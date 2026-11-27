@@ -4,6 +4,7 @@ import router from "@/router";
 import { customProviders, privacySettings, settings } from "@/stores/settings";
 import { useWorkspaceStore } from "@/stores/workspace";
 import { actualPlatform } from "./platform";
+import brand from "@toonflow/assets/brand.ts";
 
 type UsageEvent = "onboarding.complete" | "onboarding.skip" | "workspace.canvas" | "workspace.document";
 type AgentOutcome = "success" | "failed" | "cancelled";
@@ -102,7 +103,8 @@ export function registerAnonymousData() {
   }
 
   function report() {
-    if (!collecting || !privacySettings.value.dataCollectionEnabled) return;
+    // 上报地址由品牌配置提供，留空时不上报。
+    if (!collecting || !privacySettings.value.dataCollectionEnabled || !brand.telemetryUrl) return;
     accountTime();
     controller?.abort();
     controller = new AbortController();
@@ -143,7 +145,7 @@ export function registerAnonymousData() {
       agent,
     };
     void axios
-      .post("https://api.toonflow.net/web/telemetry/report", data, {
+      .post(brand.telemetryUrl, data, {
         adapter: "fetch",
         fetchOptions: { keepalive: true, referrerPolicy: "no-referrer" },
         withCredentials: false,

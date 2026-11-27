@@ -9,7 +9,8 @@ const channels = new Map<string, { channel: Channel; capabilities: ChannelCapabi
 ]);
 
 function getEntry() {
-  const id = process.env.TOONFLOW_CHANNEL?.trim() || "toonflow";
+  // gmcut 发行版默认使用 GateMux 渠道；设置 TOONFLOW_CHANNEL=toonflow 可回到上游行为。
+  const id = process.env.TOONFLOW_CHANNEL?.trim() || "gatemux";
   const entry = channels.get(id);
   if (!entry) throw Object.assign(new Error("渠道未配置，请检查 TOONFLOW_CHANNEL"), { status: 503 });
   return { id, ...entry };

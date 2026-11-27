@@ -183,6 +183,19 @@
 | 5 | 品牌、identifier、协议、更新与遥测地址、发布流水线与签名。 |
 | 6 | 上架材料与审核（用户线下操作为主）。 |
 
+### 阶段 5 拆分（2026-11-28）
+
+桌面应用内部身份改名涉及原生辅助程序、NSIS 安装脚本、Linux 安装路径、注册表与 CI，无法在本地全部构建验证，因此拆为两步：
+
+- **5a（已实现）**：
+  - 品牌与分发配置统一在 [packages/assets/brand.ts](../packages/assets/brand.ts)（产品名 `gmcut`、官网、仓库、更新源、遥测地址），服务端、桌面端、Web 都从这里读取。
+  - 两个桌面更新源（官方源、GitHub 源）暂时都指向 gmcut 仓库的 GitHub Releases；以后有国内镜像只改 `officialUpdateUrl`。gmcut 发布第一个版本前，检查更新会失败。
+  - 遥测上报地址 `telemetryUrl` 留空即不上报，不再发送到上游。
+  - 关键位置品牌替换：页面标题、桌面窗口与菜单标题、首次启动页、首页侧栏、关于页、GitHub 链接、更新失败提示的官网链接；Web 的 `logo.svg` 换成单色字形，桌面图标（`logo.ico`、`logo.iconset`）换成完整彩色图标。提示文案中提到的 Toonflow 暂不改，以减少与上游冲突。关于页的上游交流群按 `community` 能力隐藏。
+  - 默认渠道改为 `gatemux`；开发时设置 `TOONFLOW_CHANNEL=toonflow` 可回到上游行为。
+  - 增量补丁基线的默认仓库改为 `emmelleai/Toonflow-app`。
+- **5b（待实施，需要 GitHub Actions 多平台构建验证）**：应用名与 identifier（建议 `cn.gatemux.gmcut`）、安装协议名（建议 `gmcut://`，含 Windows 注册表、Linux `.desktop`、macOS URL Scheme）、安装包与安装路径（`/opt/toonflow`、NSIS、PKG、`.deb` 文件名）、原生辅助程序中的名称、数据目录名、Windows 通知注册名、启动画面；发布流水线改为发布到 gmcut 仓库的 GitHub Releases，移除上游的 `TFROUTER_UPLOAD_*` 上传；代码签名（SignPath 申请通过后接入，macOS 需 Apple 开发者账号）。
+
 ## 许可与品牌合规
 
 2026-11-24 分析结论，非法律意见；正式商用前建议请律师复核。

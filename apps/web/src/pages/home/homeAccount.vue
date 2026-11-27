@@ -37,6 +37,7 @@ import { locale, translate } from "@toonflow/i18n/vue";
 import type { Login, PreviewData } from "@toonflow/server/channel";
 import http from "@/lib/http";
 import { channelCapabilities } from "@/lib/channel";
+import brand from "@toonflow/assets/brand.ts";
 import { gatemuxStatus } from "@/lib/gatemux";
 import { multiTenantEnabled, saveSettings, settings, toonflowAccountToken } from "@/stores/settings";
 import { currentUser, publicWeb } from "@/stores/multiTenant";
@@ -78,7 +79,7 @@ async function handleCommand(command: string) {
   if (command === "settings") emit("openSettings");
   if (command === "account") emit("openAccount");
   if (command === "deviceLink") emit("openDeviceLink");
-  if (command === "github") window.open("https://github.com/HBAI-Ltd/Toonflow-app", "_blank", "noopener,noreferrer");
+  if (command === "github") window.open(brand.repository, "_blank", "noopener,noreferrer");
   if (command !== "logout" || loggingOut.value) return;
   loggingOut.value = true;
   try {

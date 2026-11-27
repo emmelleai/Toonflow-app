@@ -1,9 +1,9 @@
 <template>
   <div class="about">
     <div class="brand">
-      <div class="brandMark"><img class="brandLogo" :src="logoUrl" alt="Toonflow Logo" /></div>
+      <div class="brandMark"><img class="brandLogo" :src="logoUrl" :alt="`${brand.name} Logo`" /></div>
       <div class="brandInfo">
-        <h3>Toonflow</h3>
+        <h3>{{ brand.name }}</h3>
         <div class="brandMeta">
           <span v-if="currentVersion">v{{ currentVersion }}</span>
           <el-tag v-if="clientBuild?.channel || snapshot?.channel" type="info" size="small" round>{{ clientBuild?.channel || snapshot?.channel }}</el-tag>
@@ -52,14 +52,14 @@
       <div v-if="!isMobile && snapshot?.installFailure" class="installFailureNotice" role="alert">
         <strong>上次更新未成功</strong>
         <p>{{ snapshot.installFailure.message }}</p>
-        <p>请前往 GitHub 最新发布页或官网 toonflow.net，选择适合当前系统的完整安装包，关闭客户端后重新安装。</p>
+        <p>请前往 GitHub 最新发布页或官网，选择适合当前系统的完整安装包，关闭客户端后重新安装。</p>
         <el-button tag="a" type="primary" size="small" :href="snapshot.installFailure.downloadUrl" target="_blank" rel="noopener noreferrer">前往下载页</el-button>
-        <el-button tag="a" size="small" href="https://toonflow.net" target="_blank" rel="noopener noreferrer">前往官网</el-button>
+        <el-button tag="a" size="small" :href="brand.website" target="_blank" rel="noopener noreferrer">前往官网</el-button>
       </div>
     </el-card>
 
     <el-card class="infoCard repositoryCard" shadow="never">
-      <a class="repositoryLink" :href="repositoryUrl" target="_blank" rel="noopener noreferrer" aria-label="GitHub 仓库：HBAI-Ltd/Toonflow-app">
+      <a class="repositoryLink" :href="repositoryUrl" target="_blank" rel="noopener noreferrer" :aria-label="`GitHub 仓库：${brand.repositoryName}`">
         <icon-brand-github class="repositoryIcon" :size="22" aria-hidden="true" />
         <div class="repositoryInfo">
           <span class="repositoryTitle">GitHub 仓库</span>
@@ -68,7 +68,8 @@
       </a>
     </el-card>
 
-    <el-card class="infoCard" shadow="never">
+    <!-- 上游 Toonflow 的交流群，随社区能力一起按渠道隐藏。 -->
+    <el-card v-if="channelCapabilities.community" class="infoCard" shadow="never">
       <div class="cardHeader">
         <div class="cardLabel">
           <icon-brand-wechat :size="20" aria-hidden="true" />
@@ -238,6 +239,7 @@ import {
   IconQrcode,
 } from "@tabler/icons-vue";
 import logoUrl from "@toonflow/assets/logo.svg";
+import brand from "@toonflow/assets/brand.ts";
 import type { Sponsor } from "@toonflow/server/channel";
 import http from "@/lib/http";
 import { channelCapabilities } from "@/lib/channel";
@@ -257,7 +259,7 @@ import {
 
 const messageMarkdown = defineAsyncComponent(() => import("@/components/messageMarkdown.vue"));
 const privacy = defineAsyncComponent(() => import("./privacy.vue"));
-const repositoryUrl = "https://github.com/HBAI-Ltd/Toonflow-app";
+const repositoryUrl = brand.repository;
 const communityUrl = "https://work.weixin.qq.com/u/vc66e4c7f8432af0d8?v=5.0.13.84802&bb=c03c3ad130";
 const clientBuild = ref<{ version: string; channel: string }>();
 const currentVersion = computed(() => actualPlatform.isDesktop && actualPlatform.isRemoteConnection

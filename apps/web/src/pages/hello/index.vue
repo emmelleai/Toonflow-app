@@ -38,14 +38,14 @@
 
       <footer class="pageFooter">
         <el-button class="deviceLink" size="small" :icon="IconDevices" @click="mobileConnectVisible = true">{{ mobileConnectionLabel }}</el-button>
-        <p>© {{ new Date().getFullYear() }} Toonflow · 保留所有权利。</p>
+        <p>© {{ new Date().getFullYear() }} {{ brand.name }} · 保留所有权利。</p>
       </footer>
     </section>
     <div class="artPanel" aria-hidden="true">
       <bg class="artBg" />
       <div class="artBrand">
         <span class="artLogo" v-html="logoSvg" />
-        <span class="artName">Toonflow</span>
+        <span class="artName">{{ brand.name }}</span>
       </div>
     </div>
     <mobileConnect v-model="mobileConnectVisible" />
@@ -61,6 +61,7 @@ import { customProviders, multiTenantEnabled, toonflowAccountToken } from "@/sto
 import { useHelloStore } from "@/stores/hello";
 import { useDeveloperStore } from "@/stores/developer";
 import { channelCapabilities } from "@/lib/channel";
+import brand from "@toonflow/assets/brand.ts";
 import { gatemuxStatus } from "@/lib/gatemux";
 import anonymousData from "@/lib/anonymousData";
 import logoSvg from "@toonflow/assets/logo.svg?raw";

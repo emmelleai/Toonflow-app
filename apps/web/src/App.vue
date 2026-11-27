@@ -29,11 +29,11 @@
               <dd><strong>{{ installFailure.targetVersion ? `v${installFailure.targetVersion}` : "未知版本" }}</strong><code>{{ installFailure.targetHash || "构建标识未知" }}</code></dd>
             </div>
           </dl>
-          <p class="failureHint">请前往 GitHub 最新发布页或官网 toonflow.net，选择适合当前系统的完整安装包，关闭客户端后重新安装。</p>
+          <p class="failureHint">请前往 GitHub 最新发布页或官网，选择适合当前系统的完整安装包，关闭客户端后重新安装。</p>
         </div>
         <template #footer>
           <el-button @click="installFailureVisible = false">稍后</el-button>
-          <el-button tag="a" href="https://toonflow.net" target="_blank" rel="noopener noreferrer">前往官网</el-button>
+          <el-button tag="a" :href="brand.website" target="_blank" rel="noopener noreferrer">前往官网</el-button>
           <el-button tag="a" type="primary" :href="installFailure.downloadUrl" target="_blank" rel="noopener noreferrer">前往下载页</el-button>
         </template>
       </el-dialog>
@@ -44,6 +44,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, shallowRef, watch, watchEffect } from "vue";
 import { ElMessage, useZIndex } from "element-plus";
+import brand from "@toonflow/assets/brand.ts";
 import { elementLocales } from "@toonflow/i18n/elementPlus";
 import { ConfigProvider, type GlobalConfigProvider } from "tdesign-vue-next";
 import tdesignZhCn from "tdesign-vue-next/es/locale/zh_CN";
