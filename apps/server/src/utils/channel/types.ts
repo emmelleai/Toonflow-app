@@ -302,6 +302,8 @@ export type ChannelCapabilities = {
   advertisements: boolean;
   /** 自定义文本 / 媒体供应商设置；关闭时仍可经开发者选项打开。 */
   customProviders: boolean;
+  /** GateMux 账号授权（轮询授权、续期、退出与账号信息）。 */
+  gatemuxAuth: boolean;
 };
 
 export interface Channel {

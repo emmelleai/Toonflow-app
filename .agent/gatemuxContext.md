@@ -81,7 +81,14 @@
 4. 续期 `POST /v1/oauth/renew`（携带旧凭证，仅到期前 30 天内；旧凭证立即作废，返回新凭证）。错误 `renew_too_early`、`credential_expired`。
 5. 退出 `POST /v1/oauth/revoke`。用户也可在 GateMux 控制台“设备”页撤销。
 6. 限流：每 IP 每分钟 10 次 authorize；每应用最多 100 个待批准。
-7. 文档建议把 `pat` 存入系统钥匙串；现有实现把账号 token 存在 `settings.json`（`0o600`），是否改为钥匙串待定。
+7. 文档建议把 `pat` 存入系统钥匙串；阶段 2 采用配置文件中 `settings` 之外的独立项 `gatemuxCredential`（`settings.json`，`0o600`），不随设置接口下发前端。改为系统钥匙串列为后续优化。
+8. 2026-11-27 实测补充（文档未写明）：撤销为 `POST /v1/oauth/revoke`，JSON 体 `{"token": pat}`，成功返回 `{"status":"revoked","revoked":[...]}`；续期在 `Authorization` 头携带旧凭证（`Key` 与 `Bearer` 均可）；错误统一为 `{"error":{"message","type","code"}}`，缺少 Authorization 头时为 `{"detail": ...}`。令牌接口 200 响应已在 2026-11-27 真实授权中验证（`pat`、`expires_at` 按 Unix 秒解析正确，有效期 90 天）；续期 200 响应要到期前 30 天内才能实测，届时再核对。
+
+### gmcut 应用信息
+
+- `app_id`：`app_6192bdd29fa6870a`（公开标识，草稿状态）。服务端默认使用它，启动或构建时可用环境变量 `GATEMUX_APP_ID` 覆盖，用于区分测试应用与正式应用。
+- 申请的权限：`models:read`、`responses:create`、`media:create`、`files:write`、`account:read`、`billing:read`；不申请 `workflow:create`、`openid`、`email`。实际授予范围为申请范围与应用登记范围的交集。
+- 不申请 `client_secret`；回调地址、可嵌入站点、可信出口 IP 均留空（桌面应用出口 IP 不固定，填写会导致所有调用被拒绝）。
 
 ### 权限（scope）与计费
 

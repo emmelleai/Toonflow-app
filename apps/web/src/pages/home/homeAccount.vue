@@ -19,6 +19,7 @@
           <el-dropdown-item class="accountMenuItem" :icon="IconBrandGithub" command="github">Github</el-dropdown-item>
           <el-dropdown-item v-if="loggedIn" class="accountMenuItem" :icon="IconLogout" command="logout" :disabled="loggingOut">退出登录</el-dropdown-item>
           <el-dropdown-item v-else-if="publicWeb || channelCapabilities.account" class="accountMenuItem" :icon="IconLogin" command="account">登录</el-dropdown-item>
+          <el-dropdown-item v-else-if="channelCapabilities.gatemuxAuth" class="accountMenuItem" :icon="IconLogin" command="account">{{ gatemuxStatus.authorized ? "GateMux 账号" : "GateMux 授权" }}</el-dropdown-item>
         </el-dropdown-menu>
       </template>
     </el-dropdown>
@@ -36,6 +37,7 @@ import { locale, translate } from "@toonflow/i18n/vue";
 import type { Login, PreviewData } from "@toonflow/server/channel";
 import http from "@/lib/http";
 import { channelCapabilities } from "@/lib/channel";
+import { gatemuxStatus } from "@/lib/gatemux";
 import { multiTenantEnabled, saveSettings, settings, toonflowAccountToken } from "@/stores/settings";
 import { currentUser, publicWeb } from "@/stores/multiTenant";
 import { hasDesktopUpdate } from "@/stores/desktopUpdate";

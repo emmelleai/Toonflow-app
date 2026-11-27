@@ -22,7 +22,8 @@
         <h1 id="welcomeTitle">快速开始</h1>
         <p v-if="channelCapabilities.account" class="description">登录 Toonflow 即可免配置快速开始，直接开启创作。</p>
         <accountPanel v-if="channelCapabilities.account && !loggedIn" class="accountContent" @loggedIn="startWithAccount" />
-        <el-button v-else-if="loggedIn" class="startButton" type="primary" :loading="saving" @click="completeSetup">开始使用</el-button>
+        <gatemuxAccountPanel v-else-if="channelCapabilities.gatemuxAuth && !gatemuxStatus.authorized" class="accountContent" />
+        <el-button v-else-if="loggedIn || gatemuxStatus.authorized" class="startButton" type="primary" :loading="saving" @click="completeSetup">开始使用</el-button>
         <div class="secondaryActions">
           <template v-if="!multiTenantEnabled && (channelCapabilities.customProviders || developerStore.developerConfirmed)">
             <el-button class="secondaryButton" round :disabled="saving" @click="view = 'custom'">
@@ -60,6 +61,7 @@ import { customProviders, multiTenantEnabled, toonflowAccountToken } from "@/sto
 import { useHelloStore } from "@/stores/hello";
 import { useDeveloperStore } from "@/stores/developer";
 import { channelCapabilities } from "@/lib/channel";
+import { gatemuxStatus } from "@/lib/gatemux";
 import anonymousData from "@/lib/anonymousData";
 import logoSvg from "@toonflow/assets/logo.svg?raw";
 import bg from "./bg.vue";
@@ -67,6 +69,7 @@ import languageSelect from "@/components/languageSelect.vue";
 import { mobileConnectionLabel } from "@/lib/mobile";
 
 const accountPanel = defineAsyncComponent(() => import("@/components/settings/panels/account/index.vue"));
+const gatemuxAccountPanel = defineAsyncComponent(() => import("@/components/settings/panels/gatemuxAccount/index.vue"));
 const languageModel = defineAsyncComponent(() => import("@/components/settings/panels/languageModel/index.vue"));
 const mobileConnect = defineAsyncComponent(() => import("@/components/mobileConnect.vue"));
 const mobileConnectVisible = ref(false);

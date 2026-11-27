@@ -2,7 +2,7 @@ import { Toonflow } from "./toonflow";
 import { GateMux, gatemuxCapabilities } from "./gatemux";
 import type { Channel, ChannelCapabilities } from "./types";
 
-const fullCapabilities: ChannelCapabilities = { account: true, pluginMarket: true, community: true, advertisements: true, customProviders: true };
+const fullCapabilities: ChannelCapabilities = { account: true, pluginMarket: true, community: true, advertisements: true, customProviders: true, gatemuxAuth: false };
 const channels = new Map<string, { channel: Channel; capabilities: ChannelCapabilities }>([
   ["toonflow", { channel: new Toonflow(), capabilities: fullCapabilities }],
   ["gatemux", { channel: new GateMux(), capabilities: gatemuxCapabilities }],

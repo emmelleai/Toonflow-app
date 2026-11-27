@@ -37,6 +37,7 @@ import * as personalization from "@/utils/personalization";
 import * as mentionFiles from "@/agent/mentionFiles";
 import * as network from "@/utils/network";
 import * as channel from "@/utils/channel";
+import * as gatemuxAuth from "@/utils/gatemux/auth";
 import * as multiTenant from "@/utils/multiTenant";
 import * as pluginServer from "@/utils/pluginServer";
 
@@ -82,6 +83,7 @@ export default {
   mentionFiles,
   network,
   channel,
+  gatemuxAuth,
   multiTenant,
   pluginServer,
 };

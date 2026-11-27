@@ -8,6 +8,7 @@ export const gatemuxCapabilities: ChannelCapabilities = {
   community: false,
   advertisements: false,
   customProviders: false,
+  gatemuxAuth: true,
 };
 
 async function unsupported(): Promise<never> {
