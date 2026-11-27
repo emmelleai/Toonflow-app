@@ -39,7 +39,7 @@ const stagingParent = resolve(projectDir, "build/desktop/pkg");
 mkdirSync(stagingParent, { recursive: true });
 const stagingDir = mkdtempSync(join(stagingParent, "payload"));
 const appName = `${desktopConfig.app.name.replace(/ /g, "")}.app`;
-const outputName = `toonflow-${version}-macos-${process.arch}.pkg`;
+const outputName = `gmcut-${version}-macos-${process.arch}.pkg`;
 try {
   const tarPath = join(stagingDir, "app.tar");
   await write(tarPath, Bun.zstdDecompressSync(await file(join(artifactDir, archiveName)).arrayBuffer()));
@@ -95,11 +95,11 @@ try {
     writeAtomicSync(join(scriptsDir, "prepareRuntime"), `#!/bin/sh
 set -eu
 consoleUser=$(/usr/bin/stat -f '%Su' /dev/console)
-case "$consoleUser" in ''|root|loginwindow) echo '请登录 Mac 桌面后重新安装 Toonflow。' >&2; exit 1;; esac
+case "$consoleUser" in ''|root|loginwindow) echo '请登录 Mac 桌面后重新安装 gmcut。' >&2; exit 1;; esac
 consoleUid=$(/usr/bin/id -u "$consoleUser")
 /bin/launchctl print "gui/$consoleUid" >/dev/null
 scriptDirectory=$(CDPATH= cd -- "$(/usr/bin/dirname "$0")" && pwd -P)
-temporaryDirectory=$(/usr/bin/mktemp -d /private/tmp/toonflowRuntime.XXXXXXXX)
+temporaryDirectory=$(/usr/bin/mktemp -d /private/tmp/gmcutRuntime.XXXXXXXX)
 trap '/bin/rm -rf "$temporaryDirectory"' EXIT
 trap 'exit 2' HUP INT TERM
 /bin/cp "$scriptDirectory/runtimeInstaller" "$temporaryDirectory/runtimeInstaller"
@@ -113,13 +113,13 @@ trap 'exit 2' HUP INT TERM
     await run(["/usr/bin/plutil", "-convert", "json", componentsPath]);
     const components = await file(componentsPath).json() as { RootRelativeBundlePath: string; BundleIsRelocatable?: boolean; BundlePreInstallScriptPath?: string; BundleInstallScriptTimeout?: number }[];
     const application = components.find(item => item.RootRelativeBundlePath === appName);
-    if (!application) throw new Error("PKG 组件清单缺少 Toonflow 应用。");
+    if (!application) throw new Error("PKG 组件清单缺少 gmcut 应用。");
     application.BundleIsRelocatable = false;
     application.BundlePreInstallScriptPath = "prepareRuntime";
     application.BundleInstallScriptTimeout = 3600;
     writeAtomicSync(componentsPath, JSON.stringify(components));
     await run(["/usr/bin/plutil", "-convert", "xml1", componentsPath]);
-    component = join(stagingDir, "toonflow.pkg");
+    component = join(stagingDir, "gmcut.pkg");
     await run(["/usr/bin/pkgbuild", "--root", applicationDir, "--component-plist", componentsPath, "--scripts", scriptsDir,
       "--identifier", desktopConfig.app.identifier, "--version", version, "--install-location", "/Applications",
       "--compression", "latest", "--min-os-version", "14.0", component]);

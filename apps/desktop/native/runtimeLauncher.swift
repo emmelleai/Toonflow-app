@@ -195,21 +195,21 @@ private final class RuntimePreparation {
           info.archiveMember == member, info.archiveSize > 32768, info.archiveSize < 500_000_000,
           info.executableSize > 0, info.executableSize < 1_000_000_000,
           [info.archiveSha256, info.executableSha256].allSatisfy({ $0.range(of: "^[a-f0-9]{64}$", options: .regularExpression) != nil }) else {
-      throw RuntimeFailure.invalid("必要运行时配置无效，请重新安装 Toonflow。")
+      throw RuntimeFailure.invalid("必要运行时配置无效，请重新安装 gmcut。")
     }
     _ = try Self.source(info.archiveUrl)
     _ = try Self.source(info.mirrorUrl)
     guard !info.sources.isEmpty, info.sources.count <= 16 else {
-      throw RuntimeFailure.invalid("必要运行时下载源配置无效，请重新安装 Toonflow。")
+      throw RuntimeFailure.invalid("必要运行时下载源配置无效，请重新安装 gmcut。")
     }
     for source in info.sources {
       guard !source.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, source.name.count <= 100 else {
-        throw RuntimeFailure.invalid("必要运行时下载源配置无效，请重新安装 Toonflow。")
+        throw RuntimeFailure.invalid("必要运行时下载源配置无效，请重新安装 gmcut。")
       }
       _ = try Self.source(source.url)
     }
     let support = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-    directory = support.appendingPathComponent("local.toonflow.desktop/runtime/bun/\(info.version)/mac\(arch == "x64" ? "X64" : "Arm64")", isDirectory: true)
+    directory = support.appendingPathComponent("cn.gatemux.gmcut/runtime/bun/\(info.version)/mac\(arch == "x64" ? "X64" : "Arm64")", isDirectory: true)
     binary = directory.appendingPathComponent("bun")
   }
 
@@ -320,7 +320,7 @@ private final class RuntimePreparation {
     let session = URLSession(configuration: configuration, delegate: receiver, delegateQueue: queue)
     var request = URLRequest(url: route.url, cachePolicy: .reloadIgnoringLocalCacheData)
     request.setValue("identity", forHTTPHeaderField: "Accept-Encoding")
-    request.setValue("Toonflow-Runtime", forHTTPHeaderField: "User-Agent")
+    request.setValue("gmcut-Runtime", forHTTPHeaderField: "User-Agent")
     if probe { request.setValue("bytes=0-32767", forHTTPHeaderField: "Range") }
     else if offset > 0 { request.setValue("bytes=\(offset)-", forHTTPHeaderField: "Range") }
     let task = session.dataTask(with: request)
@@ -417,7 +417,7 @@ private final class RuntimePreparation {
     defer { flock(descriptor, LOCK_UN); close(descriptor) }
     while flock(descriptor, LOCK_EX | LOCK_NB) != 0 {
       guard errno == EWOULDBLOCK else { throw RuntimeFailure.local("无法锁定运行时缓存。") }
-      status("正在等待必要运行时准备完成…", "另一个 Toonflow 正在使用运行时缓存。", nil)
+      status("正在等待必要运行时准备完成…", "另一个 gmcut 正在使用运行时缓存。", nil)
       try requireActive()
       Thread.sleep(forTimeInterval: 0.15)
     }
@@ -525,7 +525,7 @@ private final class RuntimeApplication: NSObject, NSApplicationDelegate, NSWindo
   let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 600, height: 235), styleMask: [.titled, .closable], backing: .buffered, defer: false)
   let root = NSStackView()
   let statusLabel = NSTextField(labelWithString: "正在准备必要运行时…")
-  let detailLabel = NSTextField(wrappingLabelWithString: "完成后将自动打开 Toonflow。")
+  let detailLabel = NSTextField(wrappingLabelWithString: "完成后将自动打开 gmcut。")
   let progress = NSProgressIndicator()
   let toggle = NSButton(title: "高级设置（可选）", target: nil, action: nil)
   let pause = NSButton(title: "暂停下载", target: nil, action: nil)
@@ -547,7 +547,7 @@ private final class RuntimeApplication: NSObject, NSApplicationDelegate, NSWindo
   var installerTimer: Timer?
 
   var completionMessage: String {
-    preparationResources == nil ? "完成后将自动打开 Toonflow。" : "完成后将继续安装。"
+    preparationResources == nil ? "完成后将自动打开 gmcut。" : "完成后将继续安装。"
   }
 
   init(preparationResources: URL? = nil, installerPid: pid_t? = nil) {
@@ -620,7 +620,7 @@ private final class RuntimeApplication: NSObject, NSApplicationDelegate, NSWindo
     address.isEditable = false
     window.center()
     do {
-      guard let resources = preparationResources ?? Bundle.main.resourceURL else { throw RuntimeFailure.invalid("找不到 Toonflow 应用资源。") }
+      guard let resources = preparationResources ?? Bundle.main.resourceURL else { throw RuntimeFailure.invalid("找不到 gmcut 应用资源。") }
       let configuration = resources.appendingPathComponent("runtimeInfo.json")
       info = try JSONDecoder().decode(RuntimeInfo.self, from: Data(contentsOf: configuration))
       source.addItems(withTitles: info!.sources.map { $0.name } + ["自定义 HTTPS 地址"])
@@ -635,7 +635,7 @@ private final class RuntimeApplication: NSObject, NSApplicationDelegate, NSWindo
   }
 
   func application(_ application: NSApplication, open urls: [URL]) {
-    for url in urls where url.scheme == "toonflow" && url.absoluteString.count <= 8192 {
+    for url in urls where url.scheme == "gmcut" && url.absoluteString.count <= 8192 {
       if pendingUrls.count < 20 && !pendingUrls.contains(url.absoluteString) { pendingUrls.append(url.absoluteString) }
     }
   }
@@ -770,11 +770,11 @@ private final class RuntimeApplication: NSObject, NSApplicationDelegate, NSWindo
   }
 
   func launch(_ binary: URL) throws {
-    guard let resources = Bundle.main.resourceURL else { throw RuntimeFailure.invalid("找不到 Toonflow 应用资源。") }
+    guard let resources = Bundle.main.resourceURL else { throw RuntimeFailure.invalid("找不到 gmcut 应用资源。") }
     let bin = resources.deletingLastPathComponent().appendingPathComponent("MacOS", isDirectory: true)
-    guard chdir(bin.path) == 0 else { throw RuntimeFailure.local("无法打开 Toonflow 应用目录。") }
+    guard chdir(bin.path) == 0 else { throw RuntimeFailure.local("无法打开 gmcut 应用目录。") }
     // ACT: Core 按真实 Bun 路径查库；固定到应用目录，主线程和 Worker 加载同一份原生库。
-    guard setenv("DYLD_LIBRARY_PATH", bin.path, 1) == 0 else { throw RuntimeFailure.local("无法设置 Toonflow 原生库目录。") }
+    guard setenv("DYLD_LIBRARY_PATH", bin.path, 1) == 0 else { throw RuntimeFailure.local("无法设置 gmcut 原生库目录。") }
     if !pendingUrls.isEmpty {
       let data = try JSONSerialization.data(withJSONObject: pendingUrls)
       setenv("TOONFLOW_PENDING_URLS", String(decoding: data, as: UTF8.self), 1)

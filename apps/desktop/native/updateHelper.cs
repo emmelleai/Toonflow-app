@@ -68,7 +68,7 @@ internal static class updateHelper
                 throw new InvalidOperationException("安装目录不完整。");
             string identifier = text(plan, "identifier");
             string channel = text(plan, "channel");
-            if (identifier != "local.toonflow.desktop" || (channel != "stable" && channel != "canary"))
+            if (identifier != "cn.gatemux.gmcut" || (channel != "stable" && channel != "canary"))
                 throw new InvalidOperationException("更新计划的应用标识或通道无效。");
             version = matching(plan, "version", "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(-[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?(\\+[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?$");
             hash = matching(plan, "hash", "^[a-zA-Z0-9]{1,128}$");
@@ -78,7 +78,7 @@ internal static class updateHelper
             var oldInfo = verifyApp(Path.Combine(candidate, "app"), identifier, channel, null, null);
             string mutexName;
             using (var sha = SHA256.Create()) mutexName = BitConverter.ToString(sha.ComputeHash(utf8.GetBytes(candidate.ToUpperInvariant()))).Replace("-", "");
-            mutex = new Mutex(false, "Local\\ToonflowUpdate-" + mutexName);
+            mutex = new Mutex(false, "Local\\GmcutUpdate-" + mutexName);
             try { locked = mutex.WaitOne(0); }
             catch (AbandonedMutexException) { locked = true; }
             if (!locked) throw new InvalidOperationException("当前安装正在执行另一个更新。");
@@ -100,7 +100,7 @@ internal static class updateHelper
                 string parentPath = parent.MainModule.FileName;
                 if (parent.HasExited || (!inside(parentPath, Path.Combine(root, "app", "bin"))
                     && !samePath(parentPath, Path.Combine(root, "app", "Resources", "app", "startupLauncher.exe"))))
-                    throw new InvalidOperationException("父进程不属于当前 Toonflow 安装。");
+                    throw new InvalidOperationException("父进程不属于当前 gmcut 安装。");
                 using (var sha = SHA256.Create())
                     if (!String.Equals(BitConverter.ToString(sha.ComputeHash(archiveStream)).Replace("-", ""), expectedDigest, StringComparison.OrdinalIgnoreCase))
                         throw new InvalidOperationException("更新包 SHA-256 校验失败。");
@@ -119,7 +119,7 @@ internal static class updateHelper
                 while (!parent.WaitForExit(250))
                 {
                     if (!File.Exists(planPath)) throw new InvalidOperationException("更新已取消。");
-                    if (timer.Elapsed.TotalSeconds >= 60) throw new InvalidOperationException("Toonflow 未在 60 秒内退出，更新已取消。");
+                    if (timer.Elapsed.TotalSeconds >= 60) throw new InvalidOperationException("gmcut 未在 60 秒内退出，更新已取消。");
                 }
                 if (!File.Exists(planPath)) throw new InvalidOperationException("更新已取消。");
                 ensurePlainPath(root);
@@ -144,7 +144,7 @@ internal static class updateHelper
                 catch (Exception stateError) { error = new Exception(error.Message + "\n更新结果无法写入：" + stateError.Message); }
             }
             Console.Error.WriteLine(error.Message);
-            if (!quiet) MessageBox.Show(error.Message, "Toonflow 更新失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            if (!quiet) MessageBox.Show(error.Message, "gmcut 更新失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return 1;
         }
         finally
@@ -174,7 +174,7 @@ internal static class updateHelper
     {
         string name = Path.GetFileNameWithoutExtension(planPath);
         if (!Regex.IsMatch(name, "^update-[a-fA-F0-9]{32}$")) throw new InvalidOperationException("更新计划文件名无效。");
-        return "ToonflowUpdate_" + name.Substring(7).ToLowerInvariant();
+        return "GmcutUpdate_" + name.Substring(7).ToLowerInvariant();
     }
 
     private static void deleteScheduledTask(string planPath)
@@ -333,13 +333,13 @@ internal static class updateHelper
         options.EnvironmentVariables.Remove("TOONFLOW_UPDATE_TRANSACTION");
         if (transaction != null) options.EnvironmentVariables["TOONFLOW_UPDATE_TRANSACTION"] = transaction;
         process = Process.Start(options);
-        if (process == null) throw new InvalidOperationException("更新后无法启动 Toonflow。");
+        if (process == null) throw new InvalidOperationException("更新后无法启动 gmcut。");
         // 在应用确认就绪或清理完成前保持句柄，不能用进程名称定位本次启动。
         IntPtr handle = process.Handle;
         if (transaction == null)
         {
             // ACT: 回滚版本可能尚不支持就绪协议，保留旧启动器的短暂退出检查。
-            if (process.WaitForExit(1000) && process.ExitCode != 0) throw new InvalidOperationException("恢复旧版本后无法启动 Toonflow。");
+            if (process.WaitForExit(1000) && process.ExitCode != 0) throw new InvalidOperationException("恢复旧版本后无法启动 gmcut。");
             return;
         }
         var timer = Stopwatch.StartNew();
@@ -443,7 +443,7 @@ internal static class updateHelper
         catch (Exception error)
         {
             Console.Error.WriteLine(error.Message);
-            if (!quiet) MessageBox.Show(error.Message, "Toonflow 解压失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            if (!quiet) MessageBox.Show(error.Message, "gmcut 解压失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return 1;
         }
     }
@@ -611,7 +611,7 @@ internal static class updateHelper
         string uninstaller = Path.Combine(root, "UninstallNSIS.exe");
         if (!File.Exists(uninstaller)) return;
         ensurePlainPath(uninstaller);
-        string ini = Path.Combine(root, "toonflow.ini");
+        string ini = Path.Combine(root, "gmcut.ini");
         ensurePlainPath(ini);
         var oldDirectory = new StringBuilder(32768);
         GetPrivateProfileString("application", "installDirectory", "", oldDirectory, (uint)oldDirectory.Capacity, ini);
@@ -620,7 +620,7 @@ internal static class updateHelper
         {
             if (registry != null)
             {
-                string registered = registry.GetValue("toonflowInstallDirectory") as string ?? registry.GetValue("InstallLocation") as string;
+                string registered = registry.GetValue("gmcutInstallDirectory") as string ?? registry.GetValue("InstallLocation") as string;
                 if (!String.IsNullOrEmpty(registered) && !samePath(registered, root) && !samePath(registered, Path.Combine(root, "app"))
                     && (oldDirectory.Length == 0 || !samePath(registered, oldDirectory.ToString())))
                 {
@@ -632,9 +632,9 @@ internal static class updateHelper
         writeFile(ini, "[application]\r\nidentifier=" + identifier + "\r\ninstallDirectory=" + root + "\r\n");
         using (var registry = Registry.CurrentUser.CreateSubKey(registryPath))
         {
-            registry.SetValue("toonflowInstallDirectory", root);
+            registry.SetValue("gmcutInstallDirectory", root);
             registry.SetValue("InstallLocation", root);
-            registry.SetValue("DisplayName", "Toonflow");
+            registry.SetValue("DisplayName", "gmcut");
             registry.SetValue("DisplayVersion", version);
             registry.SetValue("DisplayIcon", Path.Combine(root, "app", "Resources", "app.ico"));
             registry.SetValue("UninstallString", quote(uninstaller));

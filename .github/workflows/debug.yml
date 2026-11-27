@@ -7,7 +7,7 @@ on:
         description: 构建平台
         type: choice
         default: windowsX64
-        options: [windowsX64, windowsArm64, macArm64, macX64, linuxX64, linuxArm64, androidArm64, all]
+        options: [windowsX64, windowsArm64, macArm64, macX64, linuxX64, linuxArm64, androidArm64, desktop, all]
       ref:
         description: 代码分支、标签或提交；签名构建要求与所选工作流版本为同一提交
         type: string
@@ -113,7 +113,8 @@ jobs:
             { target: "androidArm64", os: "windows-2025", platform: "win32", arch: "x64", releaseFolder: "build/mobile/releases" },
           ];
           const selected = process.env.buildTarget || "all";
-          const include = targets.filter(item => selected === "all" || item.target === selected);
+          // desktop：六个桌面目标，不含 Android（gmcut 首发只发布桌面版）。
+          const include = targets.filter(item => selected === "all" || item.target === selected || (selected === "desktop" && item.target !== "androidArm64"));
           if (!include.length) throw new Error(`不支持的构建平台：${selected}`);
           const refVersion = /^v\d+\.\d+\.\d+$/.test(process.env.buildRef ?? "") ? process.env.buildRef : "";
           const version = (process.env.buildVersion?.trim() || refVersion || config.app.version).replace(/^v/, "");
@@ -133,7 +134,8 @@ jobs:
     env:
       appVersion: ${{ needs.prepare.outputs.version }}
       releaseMode: ${{ inputs.generatePatch && '--auto' || '--initial' }}
-      macCodesign: ${{ matrix.platform == 'darwin' && '1' || '0' }}
+      # ACT: 配置了 Apple 签名证书才签名与公证；未配置时构建未签名的 macOS 包。
+      macCodesign: ${{ matrix.platform == 'darwin' && secrets.MACOS_CERTIFICATE_BASE64 != '' && '1' || '0' }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -207,7 +209,7 @@ jobs:
           androidRelease: ${{ inputs.androidRelease && '1' || '0' }}
         run: bun run --cwd apps/mobile build
       - name: 准备 macOS 签名与公证凭据
-        if: matrix.platform == 'darwin'
+        if: matrix.platform == 'darwin' && env.macCodesign == '1'
         id: signing
         env:
           certificateBase64: ${{ secrets.MACOS_CERTIFICATE_BASE64 }}
@@ -338,7 +340,7 @@ jobs:
           await write(join(process.env.inspectionDirectory, "app.tar"), Bun.zstdDecompressSync(await file(join(directory, archives[0])).arrayBuffer()));
           '
           tar -xf "$inspectionDirectory/app.tar" -C "$inspectionDirectory"
-          app="$inspectionDirectory/toonflow.app"
+          app="$inspectionDirectory/gmcut.app"
           test -s "$app/Contents/Resources/AppIcon.icns"
           test -s "$app/Contents/Resources/app/bun/index.js"
           test -x "$app/Contents/MacOS/bun"
@@ -346,7 +348,7 @@ jobs:
           if [[ "$macCodesign" == '1' ]]; then
             xcrun stapler validate "$app"
           fi
-          pkgPath="$releaseDirectory/toonflow-$appVersion-macos-$packageArchitecture.pkg"
+          pkgPath="$releaseDirectory/gmcut-$appVersion-macos-$packageArchitecture.pkg"
           test -s "$pkgPath"
           if [[ "$macCodesign" == '1' ]]; then
             pkgutil --check-signature "$pkgPath"
@@ -359,8 +361,8 @@ jobs:
           while IFS= read -r -d '' appPath; do
             packagedApps+=("$appPath")
           done < <(find "$expandedDirectory" -type d -name '*.app' -prune -print0)
-          if [[ ${#packagedApps[@]} -ne 1 || "${packagedApps[0]}" != */Payload/toonflow.app ]]; then
-            echo '::error::PKG 必须包含且仅包含一个 toonflow.app 应用负载。'
+          if [[ ${#packagedApps[@]} -ne 1 || "${packagedApps[0]}" != */Payload/gmcut.app ]]; then
+            echo '::error::PKG 必须包含且仅包含一个 gmcut.app 应用负载。'
             exit 1
           fi
           app="${packagedApps[0]}"
@@ -369,7 +371,7 @@ jobs:
           test -x "$app/Contents/MacOS/bun"
           test -x "$app/Contents/MacOS/launcher"
           verifyMacArtifact "$app"
-          cmp "$inspectionDirectory/toonflow.app/Contents/Resources/version.json" "$app/Contents/Resources/version.json"
+          cmp "$inspectionDirectory/gmcut.app/Contents/Resources/version.json" "$app/Contents/Resources/version.json"
       - name: 构建 Linux 安装包及更新文件
         if: matrix.platform == 'linux'
         run: bun run release:desktop "$appVersion" "$releaseMode"
@@ -392,7 +394,7 @@ jobs:
         id: artifact
         uses: actions/upload-artifact@v7
         with:
-          name: toonflow-${{ needs.prepare.outputs.version }}-${{ matrix.target }}
+          name: gmcut-${{ needs.prepare.outputs.version }}-${{ matrix.target }}
           path: ${{ matrix.releaseFolder }}/${{ needs.prepare.outputs.version }}/
           if-no-files-found: error
           compression-level: 0
@@ -402,4 +404,4 @@ jobs:
           artifactUrl: ${{ steps.artifact.outputs.artifact-url }}
           artifactTarget: ${{ matrix.target }}
         run: |
-          printf '[下载 Toonflow %s · %s](%s)\n' "$appVersion" "$artifactTarget" "$artifactUrl" >> "$GITHUB_STEP_SUMMARY"
+          printf '[下载 gmcut %s · %s](%s)\n' "$appVersion" "$artifactTarget" "$artifactUrl" >> "$GITHUB_STEP_SUMMARY"

@@ -9,10 +9,11 @@ export const desktopTarget = process.platform === "darwin" ? (process.arch === "
 
 export default {
   app: {
-    name: "toonflow",
-    identifier: "local.toonflow.desktop",
-    version: process.env.appVersion ?? "2.0.0",
-    urlSchemes: ["toonflow"],
+    // gmcut 发行版的独立身份：与上游 Toonflow 可安装在同一台机器上，版本号从 1.0.0 独立编号。
+    name: "gmcut",
+    identifier: "cn.gatemux.gmcut",
+    version: process.env.appVersion ?? "1.0.0",
+    urlSchemes: ["gmcut"],
   },
   build: {
     mainProcess: "bun",

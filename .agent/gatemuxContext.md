@@ -194,7 +194,13 @@
   - 关键位置品牌替换：页面标题、桌面窗口与菜单标题、首次启动页、首页侧栏、关于页、GitHub 链接、更新失败提示的官网链接；Web 的 `logo.svg` 换成单色字形，桌面图标（`logo.ico`、`logo.iconset`）换成完整彩色图标。提示文案中提到的 Toonflow 暂不改，以减少与上游冲突。关于页的上游交流群按 `community` 能力隐藏。
   - 默认渠道改为 `gatemux`；开发时设置 `TOONFLOW_CHANNEL=toonflow` 可回到上游行为。
   - 增量补丁基线的默认仓库改为 `emmelleai/gmcut`。
-- **5b（待实施，需要 GitHub Actions 多平台构建验证）**：应用名与 identifier（建议 `cn.gatemux.gmcut`）、安装协议名（建议 `gmcut://`，含 Windows 注册表、Linux `.desktop`、macOS URL Scheme）、安装包与安装路径（`/opt/toonflow`、NSIS、PKG、`.deb` 文件名）、原生辅助程序中的名称、数据目录名、Windows 通知注册名、启动画面；发布流水线改为发布到 gmcut 仓库的 GitHub Releases，移除上游的 `TFROUTER_UPLOAD_*` 上传；代码签名（SignPath 申请通过后接入，macOS 需 Apple 开发者账号）。
+- **5b（2026-11-28 已改代码，待 GitHub Actions 多平台构建验证）**：
+  - 应用身份：名称 `gmcut`、identifier `cn.gatemux.gmcut`、安装协议 `gmcut://`、独立版本号从 `1.0.0` 开始；安装包 `gmcut-版本-…`，Linux 包名 `gmcut`、安装在 `/opt/gmcut`，Windows 注册表与 `gmcut.ini`、互斥锁名、数据目录 `gmcut/data`、原生辅助程序与安装器文案均改为 gmcut。内部名称（`TOONFLOW_*` 环境变量、`@toonflow/*` 包、`x-toonflow-*` 请求头、`toonflow:` 页面事件、`toonflowSaveFile` 等）保持不变，以减少与上游的冲突。
+  - 只发布桌面版：调试工作流新增 `desktop` 目标（六个桌面平台，不含 Android），发布工作流使用它；Android 代码保留但不改名、不发布（`toonflow://restart`、`toonflow://save` 仅 Android 使用）。
+  - 发布工作流只发布到 gmcut 仓库的 GitHub Releases，已移除上游的 `TFROUTER_UPLOAD_*` 上传；发布说明改为 gmcut 并注明未签名。
+  - macOS：配置了 `MACOS_CERTIFICATE_BASE64` 等签名 Secret 才签名与公证，未配置时构建未签名包。
+  - 尚未处理：原生启动画面 `packages/startup/assets/startup.json` 是绘制 Toonflow 字样的 Lottie 动画，需要重新制作 gmcut 版本；上游的 `signPath.yml` 仍指向上游的 SignPath 配置，申请到 gmcut 自己的 SignPath 后再替换；Windows 代码签名。
+- **5b 原计划范围（供核对）**：应用名与 identifier（建议 `cn.gatemux.gmcut`）、安装协议名（建议 `gmcut://`，含 Windows 注册表、Linux `.desktop`、macOS URL Scheme）、安装包与安装路径（`/opt/toonflow`、NSIS、PKG、`.deb` 文件名）、原生辅助程序中的名称、数据目录名、Windows 通知注册名、启动画面；发布流水线改为发布到 gmcut 仓库的 GitHub Releases，移除上游的 `TFROUTER_UPLOAD_*` 上传；代码签名（SignPath 申请通过后接入，macOS 需 Apple 开发者账号）。
 
 ## 许可与品牌合规
 

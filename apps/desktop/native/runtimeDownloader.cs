@@ -84,7 +84,7 @@ internal sealed class downloadWindow : Form
         quietMode = quiet;
         targetDirectory = directory;
         cacheDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "local.toonflow.desktop", "runtime", "bun", runtimeConfig.version, "windows" + runtimeConfig.architecture);
+            "cn.gatemux.gmcut", "runtime", "bun", runtimeConfig.version, "windows" + runtimeConfig.architecture);
         SuspendLayout();
         DoubleBuffered = true;
         ResizeRedraw = true;
@@ -361,7 +361,7 @@ internal sealed class downloadWindow : Form
         if (fileMatches(target, binarySize, binaryDigest)) return;
         Directory.CreateDirectory(cacheDirectory);
         var timer = Stopwatch.StartNew();
-        using (var mutex = new Mutex(false, "Local\\toonflowBun" + runtimeConfig.version + "Windows" + runtimeConfig.architecture))
+        using (var mutex = new Mutex(false, "Local\\gmcutBun" + runtimeConfig.version + "Windows" + runtimeConfig.architecture))
         {
             bool locked = false;
             try
@@ -578,7 +578,7 @@ internal sealed class downloadWindow : Form
             request.AllowAutoRedirect = false;
             request.Timeout = remaining;
             request.ReadWriteTimeout = remaining;
-            request.UserAgent = "ToonflowRuntime/1.0";
+            request.UserAgent = "gmcutRuntime/1.0";
             request.Proxy = route.direct ? null : WebRequest.GetSystemWebProxy();
             request.AddRange(0, sampleBytes - 1);
             lock (probeLock)
@@ -772,7 +772,7 @@ internal sealed class downloadWindow : Form
             request.AllowAutoRedirect = false;
             request.Timeout = Math.Min(15000, remaining);
             request.ReadWriteTimeout = Math.Min(30000, remaining);
-            request.UserAgent = "ToonflowRuntime/1.0";
+            request.UserAgent = "gmcutRuntime/1.0";
             request.Proxy = direct ? null : WebRequest.GetSystemWebProxy();
             if (offset > 0) request.AddRange(offset);
             log("request; host=" + uri.Host + "; offset=" + offset);
