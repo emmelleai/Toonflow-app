@@ -238,6 +238,7 @@ gmcut 开源后，仓库内容和完整 Git 历史都会公开。以下规则在
 - `pat` 只放在 `Authorization` 请求头中，不放进 URL、查询参数、日志、遥测、错误信息或画布 / 工作区文件；供应商报错统一经 `tool.errorMessage` 脱敏。
 - GateMux MCP 自动配置时，在建立连接时注入 `Authorization`，不把 `pat` 写进 `mcpServers` 配置（该配置会经 MCP 列表接口返回前端）。
 - 退出登录时调用 `POST /v1/oauth/revoke` 并删除本地凭证；收到 401 时清除本地凭证。
+- 阶段 3 实现：GateMux 文本供应商（ID `gatemux`）只在服务端由 `getConfiguredProviders()` 注入，`apiKey` 即 `pat`，前端经 `/api/ai/models` 只拿到模型 ID 与名称。模型列表取自 `/v1/models` 中 `protocols` 含 `openai-completions` 的项，缓存在配置项 `gatemuxModels`（10 分钟，按调用刷新）。读取模型、账号信息时遇到 401 会清除凭证；对话过程中模型请求返回的 401 由 SDK 报错给用户，暂不自动清除，下次读取模型或账号时再清除。
 
 ### 发布前检查（人工执行，不新增检查脚本）
 

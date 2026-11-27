@@ -3,6 +3,7 @@ import { getSupportedThinkingLevels, type KnownApi, type Model, type ThinkingLev
 import { defaultThinkingLevels, thinkingLevels, type ThinkingLevel } from "@/lib/modelReasoning";
 import conf from "@/utils/conf";
 import { findModelContextLimits } from "@/utils/ai/modelContextLimits";
+import { getProvider as getGatemuxProvider } from "@/utils/gatemux/models";
 import { validateHeaderName, validateHeaderValue } from "node:http";
 import { z } from "zod";
 
@@ -67,7 +68,11 @@ export function getAccountProvider() {
 export function getConfiguredProviders() {
   const providers = conf.get("settings", {}).customProviders;
   const account = getAccountProvider();
-  return [...(account ? [account] : []), ...(Array.isArray(providers) ? providers.filter(item => typeof item?.id !== "string" || item.id.toLowerCase() !== "toonflow") : [])];
+  const gatemux = getGatemuxProvider();
+  // GateMux 授权后作为账号供应商排在最前；同 ID 的自定义供应商让位，避免模型选择串到别的配置。
+  return [...(gatemux ? [gatemux] : []), ...(account ? [account] : []), ...(Array.isArray(providers)
+    ? providers.filter(item => typeof item?.id !== "string" || !["toonflow", ...(gatemux ? [gatemux.id] : [])].includes(item.id.toLowerCase()))
+    : [])];
 }
 
 const builtinModels: Model<KnownApi>[] = getBuiltinProviders().flatMap(provider => getBuiltinModels(provider));

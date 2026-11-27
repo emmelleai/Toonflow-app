@@ -1,5 +1,6 @@
 import { shallowRef } from "vue";
 import { ElMessage } from "element-plus";
+import { invalidateNodeModels } from "@toonflow/nodes-scaffold/nodeAi";
 import http from "@/lib/http";
 
 // GateMux 轮询授权的前端状态：凭证只在服务端，前端只拿到授权状态与账号信息。
@@ -50,6 +51,8 @@ function schedulePoll(flowId: string, interval: number) {
       stopPolling();
       if (status === "expired") return void ElMessage.warning("授权已过期或未完成，请重新授权");
       ElMessage.success("GateMux 授权成功");
+      // 授权后服务端会提供 GateMux 文本模型，刷新模型选项。
+      invalidateNodeModels("language");
       await refreshGatemux();
     } catch (error) {
       if (gatemuxPending.value?.flowId !== flowId) return;
@@ -79,5 +82,6 @@ export async function logoutGatemux() {
   const { revoked } = await http<{ revoked: boolean }>({ method: "POST", url: "/api/gatemux/auth/logout" });
   gatemuxStatus.value = { authorized: false };
   gatemuxAccount.value = null;
+  invalidateNodeModels("language");
   return revoked;
 }

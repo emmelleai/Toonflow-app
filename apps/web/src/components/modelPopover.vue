@@ -25,7 +25,7 @@
           <el-select :modelValue="selectedModelChoice ? selectedModel : ''" filterable :disabled="disabled" :teleported="false" placeholder="选择模型" aria-label="选择模型" noDataText="请先在设置中添加模型" @update:modelValue="selectedModel = $event" @change="reasoningEffort = ''">
             <template #prefix><modelIcon v-if="selectedModelChoice" :model="selectedModelChoice.modelId" :size="18" /></template>
             <template #label="{ label }"><modelLabel :label="label" :providerId="selectedModelChoice?.providerId" /></template>
-            <template v-if="!modelChoices.length && !multiTenantEnabled && channelCapabilities.account && !toonflowAccountToken && openSettingsPanel" #empty>
+            <template v-if="!modelChoices.length && !multiTenantEnabled && needsModelLogin && openSettingsPanel" #empty>
               <modelLoginGuide @login="visible = false" />
             </template>
             <el-option-group v-for="provider in modelGroups" :key="provider.id" :label="provider.label">
@@ -63,6 +63,7 @@ import modelLabel from "@toonflow/node-shared/modelLabel";
 import type { ThinkingLevel } from "@toonflow/server/modelReasoning";
 import { modelChoices, multiTenantEnabled, refreshModelChoices, toonflowAccountToken } from "@/stores/settings";
 import { channelCapabilities } from "@/lib/channel";
+import { gatemuxStatus } from "@/lib/gatemux";
 import modelLoginGuide from "./modelLoginGuide.vue";
 
 const selectedModel = defineModel<string>({ default: "" });
@@ -70,6 +71,9 @@ const reasoningEffort = defineModel<string>("reasoningEffort", { default: "" });
 const props = withDefaults(defineProps<{ active?: boolean; disabled?: boolean }>(), { active: true, disabled: false });
 const visible = ref(false);
 const openSettingsPanel = inject<(id: string) => void>("openSettingsPanel");
+const needsModelLogin = computed(() => channelCapabilities.value.gatemuxAuth
+  ? !gatemuxStatus.value.authorized
+  : channelCapabilities.value.account && !toonflowAccountToken.value);
 const reasoningId = useId();
 const reasoningLabels: Record<ThinkingLevel, string> = { off: "关闭", minimal: "最小", low: "低", medium: "中", high: "高", xhigh: "极高", max: "最高" };
 const selectedModelChoice = useNodeModelSelection(modelChoices, selectedModel);

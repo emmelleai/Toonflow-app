@@ -13,6 +13,7 @@ import { readDocument } from "@/utils/documents";
 import { getConfiguredProviders, getModelLimits, getModelReasoning, getProviderBaseUrl, providerSchema } from "@/utils/ai/provider";
 import { modelGateway, requireDirectModelAccess } from "@/utils/multiTenant/gateway";
 import { createBillingUsageTracker } from "@/utils/ai/billingUsage";
+import { providerId as gatemuxProviderId, refreshModels as refreshGatemuxModels } from "@/utils/gatemux/models";
 
 export { fetchProviderModels } from "@/utils/ai/models";
 export { accountProviderSchema, getAccountProvider, getAccountToken, getConfiguredProviders, getModelLimits, getModelReasoning, providerSchema, reasoningEffortsSchema } from "@/utils/ai/provider";
@@ -22,6 +23,7 @@ export async function getConfiguredModel(providerId: string, modelId: string) {
   const resolved = execution?.upstream;
   const parsed = providerSchema.safeParse(resolved?.provider ?? getConfiguredProviders().find(item => item?.id === providerId));
   if (!parsed.success) {
+    if (providerId === gatemuxProviderId) throw Object.assign(new Error("请先授权 GateMux 账号"), { status: 401 });
     const official = providerId.toLowerCase() === "toonflow";
     throw Object.assign(new Error(official ? "请先登录 Toonflow 账号并刷新供应商" : "请先在设置中配置模型供应商"), { status: official ? 401 : 400 });
   }
@@ -42,6 +44,8 @@ export type ConfiguredModel = Awaited<ReturnType<typeof getConfiguredModel>>;
 
 export async function listAiModels() {
   if (modelGateway.enabled()) return modelGateway.catalog(["text"]);
+  // 读取失败不影响其他供应商的模型列表。
+  await refreshGatemuxModels().catch(error => console.error(error));
   return getConfiguredProviders().flatMap(item => {
     const parsed = providerSchema.extend({ id: z.string().min(1), label: z.string() }).safeParse(item);
     if (!parsed.success) return [];

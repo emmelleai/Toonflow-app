@@ -8,7 +8,7 @@ import { getChannelInfo } from "@/utils/channel";
 export type GatemuxCredential = { pat: string; scopes: string[]; expiresAt: number | null; appId: string };
 type Flow = { code: string; verifier: string; interval: number; expiresAt: number; polledAt: number };
 
-const apiUrl = "https://rest.gatemux.cn";
+export const apiUrl = "https://rest.gatemux.cn";
 // app_id 是公开标识；构建或启动时可用 GATEMUX_APP_ID 切换测试应用与正式应用。
 const clientId = process.env.GATEMUX_APP_ID?.trim() || "app_6192bdd29fa6870a";
 const scopes = ["models:read", "responses:create", "media:create", "files:write", "account:read", "billing:read"];
@@ -42,7 +42,7 @@ function upstreamError(status: number, data: unknown): never {
   fail(`GateMux 请求失败（${status}${typeof code === "string" ? `，${code}` : ""}）`, 502);
 }
 
-async function request(path: string, options: { method?: "GET" | "POST"; body?: unknown; pat?: string; signal?: AbortSignal } = {}) {
+export async function request(path: string, options: { method?: "GET" | "POST"; body?: unknown; pat?: string; signal?: AbortSignal } = {}) {
   const response = await fetch(apiUrl + path, {
     method: options.method ?? "POST",
     headers: {
@@ -69,7 +69,14 @@ function readCredential() {
   return conf.get("gatemuxCredential", null);
 }
 
-function clearCredential() {
+/** 当前有效的凭证；未授权、已过期或当前渠道未启用 GateMux 时返回 undefined。 */
+export function getCredential() {
+  if (!getChannelInfo().capabilities.gatemuxAuth) return;
+  const credential = readCredential();
+  return credential && (credential.expiresAt === null || credential.expiresAt > Date.now()) ? credential : undefined;
+}
+
+export function clearCredential() {
   conf.delete("gatemuxCredential");
 }
 
