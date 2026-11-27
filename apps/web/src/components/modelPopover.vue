@@ -25,7 +25,7 @@
           <el-select :modelValue="selectedModelChoice ? selectedModel : ''" filterable :disabled="disabled" :teleported="false" placeholder="选择模型" aria-label="选择模型" noDataText="请先在设置中添加模型" @update:modelValue="selectedModel = $event" @change="reasoningEffort = ''">
             <template #prefix><modelIcon v-if="selectedModelChoice" :model="selectedModelChoice.modelId" :size="18" /></template>
             <template #label="{ label }"><modelLabel :label="label" :providerId="selectedModelChoice?.providerId" /></template>
-            <template v-if="!modelChoices.length && !multiTenantEnabled && !toonflowAccountToken && openSettingsPanel" #empty>
+            <template v-if="!modelChoices.length && !multiTenantEnabled && channelCapabilities.account && !toonflowAccountToken && openSettingsPanel" #empty>
               <modelLoginGuide @login="visible = false" />
             </template>
             <el-option-group v-for="provider in modelGroups" :key="provider.id" :label="provider.label">
@@ -62,6 +62,7 @@ import { useNodeModelSelection } from "@toonflow/nodes-scaffold/nodeAi";
 import modelLabel from "@toonflow/node-shared/modelLabel";
 import type { ThinkingLevel } from "@toonflow/server/modelReasoning";
 import { modelChoices, multiTenantEnabled, refreshModelChoices, toonflowAccountToken } from "@/stores/settings";
+import { channelCapabilities } from "@/lib/channel";
 import modelLoginGuide from "./modelLoginGuide.vue";
 
 const selectedModel = defineModel<string>({ default: "" });

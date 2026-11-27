@@ -20,11 +20,11 @@
       </div>
       <div v-else class="welcomeContent">
         <h1 id="welcomeTitle">快速开始</h1>
-        <p class="description">登录 Toonflow 即可免配置快速开始，直接开启创作。</p>
-        <accountPanel v-if="!loggedIn" class="accountContent" @loggedIn="startWithAccount" />
-        <el-button v-else class="startButton" type="primary" :loading="saving" @click="completeSetup">开始使用</el-button>
+        <p v-if="channelCapabilities.account" class="description">登录 Toonflow 即可免配置快速开始，直接开启创作。</p>
+        <accountPanel v-if="channelCapabilities.account && !loggedIn" class="accountContent" @loggedIn="startWithAccount" />
+        <el-button v-else-if="loggedIn" class="startButton" type="primary" :loading="saving" @click="completeSetup">开始使用</el-button>
         <div class="secondaryActions">
-          <template v-if="!multiTenantEnabled">
+          <template v-if="!multiTenantEnabled && (channelCapabilities.customProviders || developerStore.developerConfirmed)">
             <el-button class="secondaryButton" round :disabled="saving" @click="view = 'custom'">
               <icon-key class="buttonIcon" />
               配置第三方模型
@@ -58,6 +58,8 @@ import { ElMessage } from "element-plus";
 import { IconArrowLeft, IconDevices } from "@tabler/icons-vue";
 import { customProviders, multiTenantEnabled, toonflowAccountToken } from "@/stores/settings";
 import { useHelloStore } from "@/stores/hello";
+import { useDeveloperStore } from "@/stores/developer";
+import { channelCapabilities } from "@/lib/channel";
 import anonymousData from "@/lib/anonymousData";
 import logoSvg from "@toonflow/assets/logo.svg?raw";
 import bg from "./bg.vue";
@@ -73,6 +75,7 @@ const loggedIn = ref(!!toonflowAccountToken.value);
 const saving = ref(false);
 const router = useRouter();
 const hello = useHelloStore();
+const developerStore = useDeveloperStore();
 
 function startWithAccount() {
   loggedIn.value = true;

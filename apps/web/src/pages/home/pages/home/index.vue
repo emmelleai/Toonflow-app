@@ -70,6 +70,7 @@ import type { AgentAttachment } from "@/components/agent/types";
 import logoUrl from "@toonflow/assets/logo.svg";
 import { useWorkspaceStore, type Project } from "@/stores/workspace";
 import http from "@/lib/http";
+import { channelCapabilities } from "@/lib/channel";
 import workspacePicker from "@/pages/home/workspacePicker.vue";
 import projectCard from "../projects/projectCard.vue";
 import projectLaunchCard from "../projects/projectLaunchCard.vue";
@@ -166,6 +167,7 @@ watch(() => props.disabled, disabled => {
 
 // 首页只预览前 3 个作品：云端未开放或加载失败时不显示该区块，完整列表、错误提示与重试在探索面板。
 async function loadExploreProjects() {
+  if (!channelCapabilities.value.community) return;
   try {
     const result = await http<ExplorePage>({ method: "POST", url: "/api/channel/community/getExploreProjects", signal: pageLifetime.signal, data: { limit: 3 } });
     exploreProjects.value = result.list.slice(0, 3);

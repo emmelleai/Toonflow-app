@@ -104,7 +104,7 @@
       </div>
     </el-card>
 
-    <section class="sponsorPanel" aria-label="赞助商">
+    <section v-if="channelCapabilities.advertisements" class="sponsorPanel" aria-label="赞助商">
       <h3 class="sponsorTitle">
         <icon-gift :size="20" aria-hidden="true" />
         赞助商
@@ -240,6 +240,7 @@ import {
 import logoUrl from "@toonflow/assets/logo.svg";
 import type { Sponsor } from "@toonflow/server/channel";
 import http from "@/lib/http";
+import { channelCapabilities } from "@/lib/channel";
 import { saveSettings } from "@/stores/settings";
 import {
   desktopAutoUpdate,
@@ -300,6 +301,7 @@ const resultMessage = computed(() => {
 const sponsors = ref<Sponsor[]>([]);
 
 onMounted(async () => {
+  if (!channelCapabilities.value.advertisements) return;
   try {
     sponsors.value = await http<Sponsor[]>({ method: "GET", url: "/api/channel/community/getSponsorList", signal: controller.signal });
   } catch (error) {

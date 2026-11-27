@@ -1,10 +1,25 @@
 import { Toonflow } from "./toonflow";
-import type { Channel } from "./types";
+import { GateMux, gatemuxCapabilities } from "./gatemux";
+import type { Channel, ChannelCapabilities } from "./types";
 
-const channels = new Map<string, Channel>([["toonflow", new Toonflow()]]);
+const fullCapabilities: ChannelCapabilities = { account: true, pluginMarket: true, community: true, advertisements: true, customProviders: true };
+const channels = new Map<string, { channel: Channel; capabilities: ChannelCapabilities }>([
+  ["toonflow", { channel: new Toonflow(), capabilities: fullCapabilities }],
+  ["gatemux", { channel: new GateMux(), capabilities: gatemuxCapabilities }],
+]);
+
+function getEntry() {
+  const id = process.env.TOONFLOW_CHANNEL?.trim() || "toonflow";
+  const entry = channels.get(id);
+  if (!entry) throw Object.assign(new Error("渠道未配置，请检查 TOONFLOW_CHANNEL"), { status: 503 });
+  return { id, ...entry };
+}
 
 export function getChannel(): Channel {
-  const source = channels.get(process.env.TOONFLOW_CHANNEL?.trim() || "toonflow");
-  if (!source) throw Object.assign(new Error("渠道未配置，请检查 TOONFLOW_CHANNEL"), { status: 503 });
-  return source;
+  return getEntry().channel;
+}
+
+export function getChannelInfo() {
+  const { id, capabilities } = getEntry();
+  return { id, capabilities };
 }

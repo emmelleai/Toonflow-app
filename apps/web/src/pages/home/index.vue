@@ -38,7 +38,7 @@
         <el-main class="pageContent">
           <homePage v-show="activeSection === 'home'" :disabled="creating || opening" :loading="creating" @create="createProject" @open="openProject" @showSection="showSection" />
           <projectsPage v-show="activeSection === 'projects'" :disabled="creating || opening" :loading="creating || !!relocationPicker?.selecting" @create="createProject()" @open="openProject" />
-          <explorePage v-show="activeSection === 'explore'" :scrollElement="pageScroll?.wrapRef" />
+          <explorePage v-if="channelCapabilities.community" v-show="activeSection === 'explore'" :scrollElement="pageScroll?.wrapRef" />
           <trumanMapPage v-show="activeSection === 'trumanMap'" />
         </el-main>
       </div>
@@ -64,6 +64,7 @@ import { useWorkspaceStore, type Project } from "@/stores/workspace";
 import { currentUser, publicWeb } from "@/stores/multiTenant";
 import useWorkspaceFiles from "@/lib/workspaceFiles";
 import http from "@/lib/http";
+import { channelCapabilities } from "@/lib/channel";
 import { waitForControlValue } from "@/lib/mcpControl";
 import settings from "@/components/settings/index.vue";
 import bg from "./bg.vue";
@@ -89,7 +90,7 @@ const homeSections = [
   { id: "home", label: "首页", icon: IconHome },
   { id: "projects", label: "项目", icon: IconFolder },
   { id: "explore", label: "探索", icon: IconCompass },
-];
+].filter(section => section.id !== "explore" || channelCapabilities.value.community);
 const mobileConnect = defineAsyncComponent(() => import("@/components/mobileConnect.vue"));
 const router = useRouter();
 const pageLifetime = new AbortController();
@@ -120,6 +121,7 @@ watch(() => currentUser.value?.role, role => {
 });
 
 async function loadAdvertisements() {
+  if (!channelCapabilities.value.advertisements) return;
   // ACT: 默认读取后台配置；开发环境显式指定预览模式时才使用临时预览。
   const preview = router.currentRoute.value.query.advertisementPreview;
   if (import.meta.env.DEV && typeof preview === "string" && ["text", "image", "web", "carousel", "stack"].includes(preview)) {
@@ -223,6 +225,7 @@ async function activateAdvertisement(advertisement: HomeAdvertisement) {
 }
 
 function showSection(section: string) {
+  if (section === "explore" && !channelCapabilities.value.community) return;
   activeSection.value = section;
   pageScroll.value?.setScrollTop(0);
 }

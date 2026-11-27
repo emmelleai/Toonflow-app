@@ -44,6 +44,8 @@ import userAccount from "@toonflow/multi-tenant-user-web/account";
 import { hasDesktopUpdate } from "@/stores/desktopUpdate";
 import { multiTenantEnabled } from "@/stores/settings";
 import { currentUser, publicWeb } from "@/stores/multiTenant";
+import { useDeveloperStore } from "@/stores/developer";
+import { channelCapabilities } from "@/lib/channel";
 import http from "@/lib/http";
 import { isMobile } from "@/lib/platform";
 import {
@@ -96,9 +98,15 @@ const allSettingsPanels = [
   { id: "about", label: "关于", icon: IconInfoCircle, component: defineAsyncComponent(() => import("./panels/about/index.vue")) },
 ];
 const publicAccountPanel = { ...allSettingsPanels[0]!, get label() { return translate("账号"); } };
+const developerStore = useDeveloperStore();
 const settingsPanels = computed(() => allSettingsPanels.filter(item => {
   if (publicWeb.value && currentUser.value?.role === "user") return ["account", "general", "about"].includes(item.id);
   if (publicWeb.value && ["multiTenant", "deviceLink", "network", "mcp", "developer", "pluginMarket"].includes(item.id)) return false;
+  const { account, customProviders } = channelCapabilities.value;
+  // 插件面板还管理已安装插件、MCP 与 FFmpeg，市场部分在面板内按渠道隐藏，这里不整页隐藏。
+  if (!publicWeb.value && !account && item.id === "account") return false;
+  // 渠道关闭自定义供应商时，确认开发者选项后才显示模型设置。
+  if (!customProviders && !developerStore.developerConfirmed && ["languageModel", "mediaModel"].includes(item.id)) return false;
   return !multiTenantEnabled.value || !["languageModel", "mediaModel", "developer"].includes(item.id);
 }).map(item => publicWeb.value && item.id === "account" ? publicAccountPanel : item));
 const activePanel = shallowRef(settingsPanels.value[0]!);

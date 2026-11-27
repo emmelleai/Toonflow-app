@@ -291,6 +291,19 @@ export type ExploreProcess = {
   }[];
 };
 
+/** 渠道开放的产品功能；前端按它显示入口，服务端按它注册 Agent / MCP 工具。 */
+export type ChannelCapabilities = {
+  /** 渠道账号：登录注册、余额钱包、子账号、账号供应商与登录引导。 */
+  account: boolean;
+  pluginMarket: boolean;
+  /** 作品社区：探索、作品详情与发布。 */
+  community: boolean;
+  /** 首页广告与关于页赞助商。 */
+  advertisements: boolean;
+  /** 自定义文本 / 媒体供应商设置；关闭时仍可经开发者选项打开。 */
+  customProviders: boolean;
+};
+
 export interface Channel {
   getCaptcha(options?: RequestOptions): Promise<Captcha>;
   sendSmsCode(params: SmsParams, options?: RequestOptions): Promise<number>;

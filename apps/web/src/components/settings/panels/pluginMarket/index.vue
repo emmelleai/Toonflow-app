@@ -3,13 +3,13 @@
     <div class="marketToolbar">
       <div class="marketHeader">
         <nav class="marketNav" aria-label="插件列表">
-          <button class="navButton" type="button" :aria-pressed="isMarketTab" @click="activeTab = 'discover'">发现插件</button>
+          <button v-if="channelCapabilities.pluginMarket" class="navButton" type="button" :aria-pressed="isMarketTab" @click="activeTab = 'discover'">发现插件</button>
           <button class="navButton" type="button" :aria-pressed="activeTab === 'installed'" @click="activeTab = 'installed'">已安装</button>
           <button class="navButton" type="button" :aria-pressed="activeTab === 'mcp'" @click="activeTab = 'mcp'">MCP</button>
           <button class="navButton" type="button" :aria-pressed="activeTab === 'ffmpeg'" @click="activeTab = 'ffmpeg'">FFmpeg</button>
         </nav>
         <div class="marketLinks">
-          <el-button tag="a" href="https://api.toonflow.net/console/plugIn" target="_blank" rel="noopener noreferrer" size="small" text :icon="IconExternalLink">
+          <el-button v-if="channelCapabilities.pluginMarket" tag="a" href="https://api.toonflow.net/console/plugIn" target="_blank" rel="noopener noreferrer" size="small" text :icon="IconExternalLink">
             网页版市场
           </el-button>
           <el-button tag="a" href="https://qcn7xdsqgc4z.feishu.cn/docx/KNBNd9naqolsy6xjAOCcEAkqnRd" target="_blank" rel="noopener noreferrer" size="small" text :icon="IconBook">
@@ -24,6 +24,7 @@
         </form>
         <div class="marketActions">
           <el-button
+            v-if="channelCapabilities.pluginMarket"
             size="small"
             type="primary"
             plain
@@ -63,7 +64,7 @@
           </button>
         </div>
         <div class="filterOptions">
-          <div class="personalFilters" role="group" aria-label="我的插件">
+          <div v-if="channelCapabilities.pluginMarket" class="personalFilters" role="group" aria-label="我的插件">
             <button class="filterButton" type="button" :aria-pressed="selectedType === 'collection'" @click="selectedType = 'collection'">收藏</button>
             <button class="filterButton" type="button" :aria-pressed="selectedType === 'my'" @click="selectedType = 'my'">我的</button>
           </div>
@@ -366,6 +367,7 @@ import { computed, defineAsyncComponent, markRaw, onMounted, onBeforeUnmount, re
 import { IconBox, IconBook, IconTool, IconFileText, IconExternalLink, IconSparkles2, IconUpload, IconCloudUpload, IconShare, IconStar, IconStarFilled, IconLink, IconSettings, IconCopy } from "@tabler/icons-vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { toonflowAccountToken as accountToken } from "@/stores/settings";
+import { channelCapabilities } from "@/lib/channel";
 import http from "@/lib/http";
 import videoPlayer from "@/components/videoPlayer.vue";
 import type { Plugin as MarketPlugin } from "@toonflow/server/channel";
@@ -394,7 +396,7 @@ const pluginTypes = {
   agent: { label: "Agent", path: agentMarketEnabled ? "agents" : null, icon: IconSparkles2, tagType: "danger" },
 } as const;
 const tabs = { get discover() { return translate("发现插件"); }, get installed() { return translate("已安装"); }, mcp: "MCP", ffmpeg: "FFmpeg" } as const;
-const activeTab = ref<keyof typeof tabs>("discover");
+const activeTab = ref<keyof typeof tabs>(channelCapabilities.value.pluginMarket ? "discover" : "installed");
 const isMarketTab = computed(() => activeTab.value === "discover");
 const marketPage = ref(1);
 const marketPageSize = 20;

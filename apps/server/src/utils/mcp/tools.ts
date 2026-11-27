@@ -15,6 +15,7 @@ import { appOperations, runAppOperation, type InstallDetails } from "@/utils/mcp
 import { listTools } from "@/utils/plugins/tools";
 import { runPluginDevelopment } from "@/utils/plugins/development";
 import { installMarketPlugin, installMarketPluginSchema, resolveMarketPlugin, searchPluginMarket, searchPluginMarketSchema } from "@/lib/pluginMarket";
+import { getChannelInfo } from "@/utils/channel";
 import { isLocalHostRequest, isLocalWorkspaceRequest } from "@/utils/workspace";
 import { isWithin, lockWorkspaceFiles, protectWorkspaceRoot, renameWorkspaceFile, removeWorkspaceFile, resolveWorkspacePath, writeWorkspaceFile } from "@/utils/workspace/files";
 import { getRuntimePlatform } from "@/lib/platform";
@@ -153,9 +154,10 @@ export async function getMcpTools(): Promise<McpTool[]> {
       return { connections: listConnections(), workspaceRoot, ...(pluginError ? { pluginError } : {}) };
     },
   }];
-  tools.push(wrapTool("searchPluginMarket", t`搜索 Toonflow 插件市场，返回可用于申请安装的插件 ID。`, z.toJSONSchema(searchPluginMarketSchema, { io: "input" }), async (args, _target, signal) =>
+  const pluginMarket = getChannelInfo().capabilities.pluginMarket;
+  if (pluginMarket) tools.push(wrapTool("searchPluginMarket", t`搜索 Toonflow 插件市场，返回可用于申请安装的插件 ID。`, z.toJSONSchema(searchPluginMarketSchema, { io: "input" }), async (args, _target, signal) =>
     searchPluginMarket(args, signal)));
-  tools.push(wrapTool("installMarketPlugin", t`按市场插件 ID 向目标 Toonflow 页面请求安装，用户允许后下载并安装。`, z.toJSONSchema(installMarketPluginSchema), async (args, target, signal) => {
+  if (pluginMarket) tools.push(wrapTool("installMarketPlugin", t`按市场插件 ID 向目标 Toonflow 页面请求安装，用户允许后下载并安装。`, z.toJSONSchema(installMarketPluginSchema), async (args, target, signal) => {
     const page = await getInstallTarget(target, signal);
     const plugin = resolveMarketPlugin(args, page.signal);
     const source = [t`插件市场`, plugin.supplier, plugin.fileName].filter(Boolean).join(" · ");

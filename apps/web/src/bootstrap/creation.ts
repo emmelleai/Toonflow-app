@@ -10,12 +10,12 @@ export async function createCreationApp(session: UserSession): Promise<App<Eleme
   // ACT: 创作端的模块会注册设备轮询和 MCP 等能力；确认身份后才加载，登录页不接触全局设置。
   const [
     { default: appRoot }, { default: router }, { loadSettings, settingsStorage, multiTenantEnabled }, { registerLanguage },
-    { registerAnonymousData }, { registerDownloads }, { registerDesktopProtocol }, { registerDesktopAutoUpdate },
+    { registerAnonymousData }, { registerDownloads }, { registerDesktopProtocol }, { registerDesktopAutoUpdate }, { loadChannelCapabilities },
   ] = await Promise.all([
     import("@/App.vue"), import("@/router"), import("@/stores/settings"), import("@/lib/i18n"),
-    import("@/lib/anonymousData"), import("@/lib/saveFile"), import("@/lib/desktopProtocol"), import("@/stores/desktopUpdate"),
+    import("@/lib/anonymousData"), import("@/lib/saveFile"), import("@/lib/desktopProtocol"), import("@/stores/desktopUpdate"), import("@/lib/channel"),
   ]);
-  await loadSettings();
+  await Promise.all([loadSettings(), loadChannelCapabilities()]);
   const app = createApp(appRoot);
   const pluginServer = createPluginServerHost();
   app.provide(pluginServerKey, pluginServer.createServer);
