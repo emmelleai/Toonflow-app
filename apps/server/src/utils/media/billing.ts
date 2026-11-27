@@ -4,6 +4,7 @@ import { z } from "zod";
 import type { ProviderBalance, ProviderPrice, ProviderPriceRequest } from "@toonflow/providers";
 import conf from "@/utils/conf";
 import { getMediaProvider, loadMediaProviderSource } from "@/utils/media/provider";
+import { withMediaCredential as withGatemuxCredential } from "@/utils/gatemux/media";
 
 type RuntimeProvider = Awaited<ReturnType<typeof loadMediaProviderSource>>;
 type BalanceSnapshot = { accountId: string; balance: ProviderBalance | null; revision: number };
@@ -113,7 +114,7 @@ function getAccount(provider: RuntimeProvider) {
 export async function getProviderBalance(providerId: string, apiKey?: string): Promise<BalanceSnapshot> {
   const { source } = await getMediaProvider(providerId);
   const configs = conf.get("settings", {}).mediaProviderConfigs as Record<string, Record<string, unknown>> | undefined;
-  const provider = await loadMediaProviderSource(source, { ...configs?.[providerId], ...(apiKey === undefined ? {} : { apiKey }) });
+  const provider = await loadMediaProviderSource(source, withGatemuxCredential(providerId, { ...configs?.[providerId], ...(apiKey === undefined ? {} : { apiKey }) }));
   const account = getAccount(provider);
   if (account.provider && account.provider.sourceRevision !== provider.sourceRevision) account.epoch++;
   account.provider = provider;

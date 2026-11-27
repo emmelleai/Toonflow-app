@@ -51,8 +51,9 @@ function schedulePoll(flowId: string, interval: number) {
       stopPolling();
       if (status === "expired") return void ElMessage.warning("授权已过期或未完成，请重新授权");
       ElMessage.success("GateMux 授权成功");
-      // 授权后服务端会提供 GateMux 文本模型，刷新模型选项。
+      // 授权后服务端会提供 GateMux 文本与媒体模型，刷新模型选项。
       invalidateNodeModels("language");
+      invalidateNodeModels("media");
       await refreshGatemux();
     } catch (error) {
       if (gatemuxPending.value?.flowId !== flowId) return;
@@ -83,5 +84,6 @@ export async function logoutGatemux() {
   gatemuxStatus.value = { authorized: false };
   gatemuxAccount.value = null;
   invalidateNodeModels("language");
+  invalidateNodeModels("media");
   return revoked;
 }

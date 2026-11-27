@@ -236,6 +236,7 @@ gmcut 开源后，仓库内容和完整 Git 历史都会公开。以下规则在
 
 - **`pat` 不随设置下发前端。** 现有 `GET /api/settings/get` 会把整个 `settings`（包括 `toonflowAccount.token` 和自定义供应商的 `apiKey`）返回给网页，而节点插件代码也运行在同一页面里，可以读到这些内容。GateMux `pat` 必须存放在 `settings` 之外的独立配置项（或系统钥匙串）中，只在服务端读取；前端只拿到授权状态、到期时间和已授予的 scope。
 - `pat` 只放在 `Authorization` 请求头中，不放进 URL、查询参数、日志、遥测、错误信息或画布 / 工作区文件；供应商报错统一经 `tool.errorMessage` 脱敏。
+- 阶段 4 实现：GateMux 媒体供应商是标准供应商源码 [mediaProvider.ts](../apps/server/src/utils/gatemux/mediaProvider.ts)（ID `gatemux`），可在其他 Toonflow 中单独安装并填写 API Key。gmcut 在 GateMux 渠道下读取媒体模型列表时，把它安装到数据目录 `providers/gatemux.ts`（带内置标记，版本变化时更新，不覆盖用户自建的同名文件），加载时由服务端注入 `pat`（`withMediaCredential`），未授权时隐藏其模型。第一批模型：Seedream 5.0 Flash、Seedream 5.5、Seedance 2.0 Mini、Seedance 2.5、Wan 3.0、DeepSeek TTS；参数取自 `https://rest.gatemux.cn/catalog/models/{模型 ID}` 的 `input_schema`。Seedream 参考图以 data URI 传入；视频模型实测要求参考素材为公开 HTTPS 地址（Wan 3.0 返回 422 `media URLs must be public HTTPS URLs.`），改为先上传到 `POST /storage/upload`（multipart 字段 `file`，字段名与响应格式文档未公开，以实测为准）；视频与音频参考暂未接入。价格实时读取目录定价（含低峰倍率），Seedance 按 token 公式估算。已知限制：取消任务只停止本地等待，不调用 GateMux 的取消接口（宿主取消后供应商的请求信号已失效）。
 - GateMux MCP 自动配置时，在建立连接时注入 `Authorization`，不把 `pat` 写进 `mcpServers` 配置（该配置会经 MCP 列表接口返回前端）。
 - 退出登录时调用 `POST /v1/oauth/revoke` 并删除本地凭证；收到 401 时清除本地凭证。
 - 阶段 3 实现：GateMux 文本供应商（ID `gatemux`）只在服务端由 `getConfiguredProviders()` 注入，`apiKey` 即 `pat`，前端经 `/api/ai/models` 只拿到模型 ID 与名称。模型列表取自 `/v1/models` 中 `protocols` 含 `openai-completions` 的项，缓存在配置项 `gatemuxModels`（10 分钟，按调用刷新）。读取模型、账号信息时遇到 401 会清除凭证；对话过程中模型请求返回的 401 由 SDK 报错给用户，暂不自动清除，下次读取模型或账号时再清除。
