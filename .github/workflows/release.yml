@@ -119,7 +119,7 @@ jobs:
             "",
             "## 🚀 安装说明",
             "",
-            "- 💻 **Windows**：双击下载的安装包，按提示完成安装。ARM64 需要 .NET Framework 4.8.1，较新的 Windows 11 已内置。",
+            "- 💻 **Windows**：双击下载的安装包，按提示完成安装。",
             "- 🍎 **Mac（macOS 14 及以上）**：双击下载的 `.pkg`，按提示继续安装；安装期间会自动下载并准备必要运行时，完成后从“应用程序”打开 gmcut。",
             "- 🐧 **Linux（Debian / Ubuntu）**：选择对应架构的 DEB，在下载目录执行 `sudo apt install ./gmcut-版本号-linux-架构.deb`。安装后可在「设置 → 关于」更新。",
             "",

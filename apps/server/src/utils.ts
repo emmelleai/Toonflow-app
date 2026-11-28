@@ -11,6 +11,11 @@ import * as builtinProvider from "@/utils/media/builtin";
 import * as mediaBilling from "@/utils/media/billing";
 import * as mediaPreview from "@/utils/media/preview";
 import * as ffmpeg from "@/utils/ffmpeg";
+import * as localModels from "@/utils/localModel";
+import * as localModelInference from "@/utils/localModel/inference";
+import { processWorkspaceAudio } from "@/utils/localModel/audio/separation";
+import { processWorkspaceImage } from "@/utils/localModel/image/upscale";
+import { previewSubtitleFrame, processWorkspaceVideo } from "@/utils/localModel/video/processing";
 import * as pluginInstall from "@/utils/plugins/install";
 import * as pluginDevelopment from "@/utils/plugins/development";
 import conf, { cleanNodeMenuSettings, removeLegacySettings } from "@/utils/conf";
@@ -35,7 +40,6 @@ import * as teams from "@/utils/teams";
 import * as a2aSettings from "@/agent/a2a/settings";
 import * as personalization from "@/utils/personalization";
 import * as mentionFiles from "@/agent/mentionFiles";
-import * as network from "@/utils/network";
 import * as channel from "@/utils/channel";
 import * as gatemuxAuth from "@/utils/gatemux/auth";
 import * as multiTenant from "@/utils/multiTenant";
@@ -55,6 +59,12 @@ export default {
   mediaBilling,
   mediaPreview,
   ffmpeg,
+  localModels,
+  localModelInference,
+  processWorkspaceAudio,
+  processWorkspaceImage,
+  processWorkspaceVideo,
+  previewSubtitleFrame,
   pluginInstall,
   pluginDevelopment,
   conf,
@@ -81,7 +91,6 @@ export default {
   a2aSettings,
   personalization,
   mentionFiles,
-  network,
   channel,
   gatemuxAuth,
   multiTenant,

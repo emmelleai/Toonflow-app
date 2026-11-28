@@ -199,7 +199,7 @@
   - 只发布桌面版：调试工作流新增 `desktop` 目标（六个桌面平台，不含 Android），发布工作流使用它；Android 代码保留但不改名、不发布（`toonflow://restart`、`toonflow://save` 仅 Android 使用）。
   - 发布工作流只发布到 gmcut 仓库的 GitHub Releases，已移除上游的 `TFROUTER_UPLOAD_*` 上传；发布说明改为 gmcut 并注明未签名。
   - macOS：配置了 `MACOS_CERTIFICATE_BASE64` 等签名 Secret 才签名与公证，未配置时构建未签名包。
-  - 品牌补充（5b 之后）：原生启动画面 `packages/startup/assets/startup.json` 保留上游 Lottie 的分段与动效，仅替换为 gmcut 图形与 Liberation Sans Bold（OFL）转出的 gmcut 字形轮廓；首次弹窗标题用 `brand.name`，正文改读 `apps/web/src/components/releaseNotes.md`（上游 `updateBox.md` 不改，便于同步）；界面与 MCP 中可见的 Toonflow 文案改为 gmcut，并同步重命名 `packages/i18n` 字典键及 22 种语言译文中的品牌名；工作区帮助中的上游反馈表、交流群、商务合作与设置中的多租户页随 `community` 能力隐藏。保留不改：仅 Toonflow 渠道或多租户可见的文案、插件格式名（如“Toonflow 节点”）、`packages/mcp` 文案（该文件本地有权限位变更）。同步上游后若出现新的 Toonflow 可见文案，按同样方式处理。
+  - 品牌补充（5b 之后）：原生启动画面 `packages/startup/assets/startup.json` 保留上游 Lottie 的分段与动效，仅替换为 gmcut 图形与 Liberation Sans Bold（OFL）转出的 gmcut 字形轮廓；首次弹窗标题用 `brand.name`，正文改读 `apps/web/src/components/updateBox/gmcutNotes.ts`（上游 `updateNotes.ts` 不改，便于同步；v2.0.12 起上游弹窗改为 `updateBox/` 目录）；界面与 MCP 中可见的 Toonflow 文案改为 gmcut，并同步重命名 `packages/i18n` 字典键及 22 种语言译文中的品牌名；工作区帮助中的上游反馈表、交流群、商务合作与设置中的多租户页随 `community` 能力隐藏。保留不改：仅 Toonflow 渠道或多租户可见的文案、插件格式名（如“Toonflow 节点”）、`packages/mcp` 文案（该文件本地有权限位变更）。同步上游后若出现新的 Toonflow 可见文案，按同样方式处理。
   - 尚未处理：上游的 `signPath.yml` 仍指向上游的 SignPath 配置，申请到 gmcut 自己的 SignPath 后再替换；Windows 代码签名。
 - **5b 原计划范围（供核对）**：应用名与 identifier（建议 `cn.gatemux.gmcut`）、安装协议名（建议 `gmcut://`，含 Windows 注册表、Linux `.desktop`、macOS URL Scheme）、安装包与安装路径（`/opt/toonflow`、NSIS、PKG、`.deb` 文件名）、原生辅助程序中的名称、数据目录名、Windows 通知注册名、启动画面；发布流水线改为发布到 gmcut 仓库的 GitHub Releases，移除上游的 `TFROUTER_UPLOAD_*` 上传；代码签名（SignPath 申请通过后接入，macOS 需 Apple 开发者账号）。
 
@@ -296,6 +296,8 @@ gmcut 开源后，仓库内容和完整 Git 历史都会公开。以下规则在
 - [apps/server/src/router.ts](../apps/server/src/router.ts) 冲突不手工解决，merge 后执行 `bun run routes` 重新生成。
 - 冲突热点：账号相关 Vue 组件、`bun.lock`、`packages/i18n` 的 22 份语言文件（gmcut 新增文案尽量少）。
 - 不改 `packages/multiTenant`。
+- 同步流程（v2.0.12 起沿用）：在 `sync/upstream-<版本>` 分支 merge `upstream/master`；`router.ts`、`components.d.ts`、`bun.lock` 与 `packages/i18n` 字典取上游版本，之后本地执行 `bun install`、`bun run routes` 重新生成；字典不要提交 `extract` 的整文件重排结果，只同步品牌相关键（脚本思路：源码已改为 gmcut 的文案，把对应键与 22 种语言译文中的 Toonflow 替换为 gmcut）。
+- 桌面端 merge 后必查：`git grep -E "local\.toonflow\.desktop|toonflow://|/opt/toonflow|toonflow-\$\{|toonflow\.(ini|pkg|deb)" -- apps/desktop packages/startup`，上游新增的更新、安装代码常写死上游标识，漏改会导致 gmcut 更新失败；上游新增的可见 Toonflow 文案按品牌补充规则处理，上游联系入口按 `community` 能力隐藏。
 
 ## 用户线下事项与风险
 
