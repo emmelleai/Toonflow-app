@@ -36,17 +36,33 @@ async function request(context: Context, url: string, init: { method?: string; b
     body: init.body === undefined ? undefined : JSON.stringify(init.body),
   });
   if (response.ok) return response;
-  const text = await response.text().catch(() => "");
-  let body: { error?: unknown; reason?: unknown; message?: unknown; detail?: unknown } | null = null;
+  // 提交时的 4xx（超时 408 除外）说明任务未被接单；轮询阶段的错误仍可能是暂时的，交由宿主复查。
+  const submitting = init.body !== undefined && response.status >= 400 && response.status < 500 && response.status !== 408;
+  throw failure("GateMux 请求失败", response.status, await response.text().catch(() => ""), submitting);
+}
+
+/** 解析 GateMux 错误；明确未接单或已被拒绝时标记 MEDIA_TASK_FAILED，宿主据此直接结束任务，不提示“结果未知”。 */
+function failure(title: string, status: number, text: string, definite: boolean) {
+  type Body = { error?: unknown; reason?: unknown; message?: unknown; detail?: unknown; risk_words?: unknown; descriptions?: unknown };
+  let body: Body | null = null;
   try { body = JSON.parse(text); } catch { /* 非 JSON 错误正文按原文显示。 */ }
+  // fal 风格的入口把错误包在 detail 中：{ detail: { error, reason, ... } }。
+  if (body?.detail && typeof body.detail === "object" && !Array.isArray(body.detail)) body = body.detail as Body;
   const error = body?.error as { code?: unknown; message?: unknown } | string | undefined;
   const code = typeof error === "string" ? error : error?.code;
-  const hint = typeof code === "string" ? errorHints[code] : undefined;
+  let hint = typeof code === "string" ? errorHints[code] : undefined;
+  if (code === "moderation_blocked") {
+    const riskWords = body?.risk_words;
+    const words = Array.isArray(riskWords) ? riskWords.filter(item => typeof item === "string").join("、") : "";
+    const description = typeof body?.descriptions === "string" ? body.descriptions : "";
+    hint = `内容未通过 GateMux 审核${description ? `：${description}` : ""}${words ? `（涉及：${words}）` : ""}。请修改提示词或参考素材后重试。`;
+  }
   // 优先显示 GateMux 给出的具体原因（reason / message / detail），没有时显示原始响应，便于排查参数问题。
   const reason = [body?.reason, body?.message, typeof error === "object" ? error?.message : undefined, body?.detail]
     .map(item => typeof item === "string" ? item : item === undefined ? "" : JSON.stringify(item)).find(Boolean);
   const detail = [typeof code === "string" ? code : "", reason ?? text.slice(0, 500)].filter(Boolean).join("：");
-  throw new Error(hint ?? `GateMux 请求失败（${response.status}）${detail ? `：${detail}` : ""}`);
+  const message = hint ?? `${title}（${status}）${detail ? `：${detail}` : ""}`;
+  return Object.assign(new Error(message), definite || code === "moderation_blocked" ? { code: "MEDIA_TASK_FAILED" } : {});
 }
 
 /** 本地素材以 data URI 直接传给模型，网络素材保留原地址（Seedream 支持 data URI）。 */
@@ -80,7 +96,8 @@ async function publicUrl(context: Context, input: Input) {
     body,
   });
   const text = await response.text();
-  if (!response.ok) throw new Error(`GateMux 上传参考素材失败（${response.status}）：${text.slice(0, 300)}`);
+  // 上传发生在提交生成之前，失败时生成任务一定未提交。
+  if (!response.ok) throw failure("GateMux 上传参考素材失败", response.status, text, true);
   let value: { url?: unknown; file_url?: unknown; access_url?: unknown; data?: { url?: unknown } } = {};
   try { value = JSON.parse(text); } catch { /* 下方统一报错。 */ }
   const url = [value.url, value.file_url, value.access_url, value.data?.url].find((item): item is string => typeof item === "string" && item.startsWith("https://"));
@@ -116,7 +133,7 @@ async function poll(context: Context, task: { mediaType: string; statusUrl: stri
     const status = await (await request(context, task.statusUrl)).json() as { status?: unknown; error?: unknown; error_type?: unknown };
     if (status.status === "COMPLETED") return result(context, task);
     if (status.status !== "IN_QUEUE" && status.status !== "IN_PROGRESS") {
-      throw new Error(`GateMux 任务失败：${context.tool.errorMessage(status.error ?? status.error_type ?? status.status) || "未知原因"}`);
+      throw Object.assign(new Error(`GateMux 任务失败：${context.tool.errorMessage(status.error ?? status.error_type ?? status.status) || "未知原因"}`), { code: "MEDIA_TASK_FAILED" });
     }
     await wait(interval, context.signal);
   }
