@@ -296,6 +296,7 @@ gmcut 开源后，仓库内容和完整 Git 历史都会公开。以下规则在
 - [apps/server/src/router.ts](../apps/server/src/router.ts) 冲突不手工解决，merge 后执行 `bun run routes` 重新生成。
 - 冲突热点：账号相关 Vue 组件、`bun.lock`、`packages/i18n` 的 22 份语言文件（gmcut 新增文案尽量少）。
 - 不改 `packages/multiTenant`。
+- `README.md` 已按 gmcut 重写，`CONTRIBUTING.md`、`CODE_OF_CONDUCT.md` 已改为 gmcut 的仓库、Issue 与私密安全报告入口：合并上游冲突时保留我们的版本，再看上游改动里是否有需要吸收的开发流程变化（如 Bun 版本、命令）。`docs/readme/` 下的多语言 README 与 `docs/development.md` 仍为上游原文，README 不再链接前者。
 - 同步流程（v2.0.12 起沿用）：在 `sync/upstream-<版本>` 分支 merge `upstream/master`；`router.ts`、`components.d.ts`、`bun.lock` 与 `packages/i18n` 字典取上游版本，之后本地执行 `bun install`、`bun run routes` 重新生成；字典不要提交 `extract` 的整文件重排结果，只同步品牌相关键（脚本思路：源码已改为 gmcut 的文案，把对应键与 22 种语言译文中的 Toonflow 替换为 gmcut）。
 - 桌面端 merge 后必查：`git grep -E "local\.toonflow\.desktop|toonflow://|/opt/toonflow|toonflow-\$\{|toonflow\.(ini|pkg|deb)" -- apps/desktop packages/startup`，上游新增的更新、安装代码常写死上游标识，漏改会导致 gmcut 更新失败；上游新增的可见 Toonflow 文案按品牌补充规则处理，上游联系入口按 `community` 能力隐藏。
 

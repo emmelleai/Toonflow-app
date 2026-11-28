@@ -1,12 +1,14 @@
 # Contributing · 贡献指南
 
-欢迎参与 Toonflow。无论是反馈问题、改进文档、开发插件，还是修复代码，都可以帮助创作者更顺畅地完成作品。
+欢迎参与 gmcut。无论是反馈问题、改进文档、开发插件，还是修复代码，都可以帮助创作者更顺畅地完成作品。
 
-参与讨论和协作前，请阅读 [社区行为准则](./CODE_OF_CONDUCT.md)。项目介绍和使用方法见 [README](./README.md)，完整开发说明见 [开发与扩展指南](./docs/development.md)，代码修改以 [开发规范](./AGENTS.md) 为准。
+gmcut 是 [Toonflow](https://github.com/HBAI-Ltd/Toonflow-app) 的下游发行版，代码在 `gmcut` 分支，`master` 分支只跟踪上游。与 GateMux 接入、gmcut 品牌和发行相关的问题在本仓库处理；与 GateMux 无关的通用缺陷（例如画布、节点、白模预演本身的问题），也欢迎直接反馈或提交到上游，上游修复后会随同步进入 gmcut。
+
+参与讨论和协作前，请阅读 [社区行为准则](./CODE_OF_CONDUCT.md)。项目介绍和使用方法见 [README](./README.md)，完整开发说明见 [开发与扩展指南](./docs/development.md)（沿用上游文档，其中的插件市场、Toonflow 账号等在线服务在 gmcut 中不提供），代码修改以 [开发规范](./AGENTS.md) 为准；涉及 GateMux 接入时，先阅读 [GateMux 发行版说明](./.agent/gatemuxContext.md)。
 
 ## 从哪里开始
 
-- **报告问题**：在 [GitHub Issues](https://github.com/HBAI-Ltd/Toonflow-app/issues) 搜索已有记录，再补充信息或提交新问题。
+- **报告问题**：在 [GitHub Issues](https://github.com/emmelleai/gmcut/issues) 搜索已有记录，再补充信息或提交新问题。
 - **提出建议**：说明创作场景、遇到的限制和期望结果；较大的功能或架构调整建议先讨论范围与影响。
 - **改进文档**：修正错误、补全步骤，或提供能够复现的操作说明。
 - **开发扩展**：参考 [节点脚手架](./packages/nodeScaffold/readme.md)、[工具脚手架](./packages/toolScaffold/readme.md) 和现有实现。
@@ -18,16 +20,16 @@
 
 一个 Issue 尽量只描述一个问题，标题直接说明出错位置或期望行为。请提供：
 
-1. Toonflow 版本；从源码运行时附上相关提交或分支信息。
+1. gmcut 版本；从源码运行时附上相关提交或分支信息。
 2. 操作系统、处理器架构，以及桌面端或浏览器运行方式。
 3. 从初始状态开始的最短复现步骤，注明是否每次都出现。
 4. 期望结果与实际结果，必要时附截图或短视频。
 5. 与问题有关的错误日志，保留错误上下文并删除无关内容。
-6. 涉及插件或模型时，注明插件版本、提供方与模型名称。
+6. 涉及插件或模型时，注明插件版本、提供方与模型名称；GateMux 模型请附上模型名称和报错信息，不要附授权凭证。
 
-请先删去 API Key、访问令牌、账号信息和个人路径。不要上传完整 `data/`、真实用户配置、私有工作区或未经授权的素材；需要示例时，使用最小的脱敏内容。
+请先删去 API Key、GateMux 授权凭证、访问令牌、账号信息和个人路径。不要上传完整 `data/`、真实用户配置、私有工作区或未经授权的素材；需要示例时，使用最小的脱敏内容。
 
-涉及安全漏洞或不宜公开的敏感信息时，请通过 [联系邮箱](mailto:ltlctools@outlook.com) 说明情况，避免在公开 Issue 中披露可被利用的细节。
+涉及安全漏洞或不宜公开的敏感信息时，请通过 [私密安全报告](https://github.com/emmelleai/gmcut/security/advisories/new) 说明情况，避免在公开 Issue 中披露可被利用的细节。
 
 ## 准备开发环境
 
@@ -40,8 +42,8 @@
 需要提交 PR 时，可以先 Fork 仓库，再克隆自己的 Fork；下面演示从项目仓库开始：
 
 ```sh
-git clone https://github.com/HBAI-Ltd/Toonflow-app.git
-cd Toonflow-app
+git clone https://github.com/emmelleai/gmcut.git
+cd gmcut
 bun install
 ```
 
@@ -192,7 +194,7 @@ bun apps/desktop/node_modules/electrobun/bin/electrobun.cjs prepare
 
 ## 提交 Pull Request
 
-从当前代码创建自己的工作分支，保持提交内容围绕本次修改。推送前检查 diff，确认没有混入本机数据和无关文件。
+基于 `gmcut` 分支创建自己的工作分支，PR 也提交到 `gmcut` 分支，保持提交内容围绕本次修改。推送前检查 diff，确认没有混入本机数据和无关文件。
 
 PR 标题直接说明解决的问题，正文建议包含：
 
@@ -206,6 +208,6 @@ PR 标题直接说明解决的问题，正文建议包含：
 
 ## 许可与素材
 
-Toonflow 采用 [MIT 许可证](./LICENSE)。提交代码、文档、图片、字体或其他素材前，请确认你有权将其用于本项目，并保留需要保留的版权与许可证声明。
+gmcut 与 Toonflow 一样采用 [MIT 许可证](./LICENSE)，保留上游版权声明；gmcut 的名称与 Logo 不在 MIT 授权范围内。提交代码、文档、图片、字体或其他素材前，请确认你有权将其用于本项目，并保留需要保留的版权与许可证声明。
 
-第三方依赖和素材遵循各自的许可。请勿提交来源不明、未经授权或含有个人敏感信息的内容。
+第三方依赖和素材遵循各自的许可。请勿提交来源不明、未经授权或含有个人敏感信息的内容，也不要提交任何 GateMux 凭证、签名证书或非公开的 GateMux 资料。
