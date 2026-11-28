@@ -16,6 +16,7 @@
     "apps/desktop": {
       "name": "@toonflow/desktop",
       "dependencies": {
+        "@toonflow/assets": "workspace:*",
         "@toonflow/file": "workspace:*",
         "@toonflow/i18n": "workspace:*",
         "@toonflow/server": "workspace:*",
@@ -49,6 +50,7 @@
         "@firecrawl/anydoc": "0.2.4",
         "@firecrawl/anydoc-wasm": "0.2.4",
         "@silvia-odwyer/photon-node": "0.3.4",
+        "@toonflow/assets": "workspace:*",
         "@toonflow/ffmpeg": "workspace:*",
         "@toonflow/file": "workspace:*",
         "@toonflow/i18n": "workspace:*",
