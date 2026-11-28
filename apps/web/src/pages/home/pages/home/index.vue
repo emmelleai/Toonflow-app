@@ -2,7 +2,7 @@
   <div class="homePanel">
     <section class="creationPanel" aria-label="创建项目">
       <div class="brand">
-        <el-image class="brandLogo" :src="logoUrl" fit="contain" alt="Toonflow" />
+        <el-image class="brandLogo" :src="logoUrl" fit="contain" :alt="brand.name" />
         <h1>今天要做点什么？</h1>
       </div>
       <div class="promptArea">
@@ -63,6 +63,7 @@ import { ElMessage, type InputInstance } from "element-plus";
 import { getReadableFileMimeType, readableFileAccept } from "@toonflow/server/documentFormats";
 import type { ExplorePage, ExploreProject } from "@toonflow/server/channel";
 import { IconArrowUp, IconFolder, IconPaperclip } from "@tabler/icons-vue";
+import brand from "@toonflow/assets/brand.ts";
 import modelPopover from "@/components/modelPopover.vue";
 import attachmentList from "@/components/agent/attachmentList.vue";
 import { createPastedTextFile, readTextAttachment } from "@/components/agent/textAttachments";

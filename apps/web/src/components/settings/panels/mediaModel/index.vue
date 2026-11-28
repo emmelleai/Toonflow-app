@@ -1,7 +1,7 @@
 <template>
   <div class="providerList">
     <div class="itemList">
-      <toonflowProviderCard scope="media" :provider="providers.find(item => item.id === 'toonflow')" />
+      <toonflowProviderCard v-if="channelCapabilities.account" scope="media" :provider="providers.find(item => item.id === 'toonflow')" />
       <el-card v-for="item in visibleProviders" :key="item.fileName" class="providerItem" shadow="never">
         <div class="providerHeader">
           <div v-if="item.icon" class="providerMark" aria-hidden="true">
@@ -55,6 +55,7 @@ import { invalidateNodeModels } from "@toonflow/nodes-scaffold/nodeAi";
 import { getBuiltinSource, useBuiltinUpgrades } from "@/lib/builtinProviders";
 import { withTerminalConfirm } from "@/lib/pluginInstallConfirmation";
 import toonflowProviderCard from "../../toonflowProviderCard.vue";
+import { channelCapabilities } from "@/lib/channel";
 
 defineProps<{ visible?: boolean }>();
 const upgradeVersion = useBuiltinUpgrades("media");

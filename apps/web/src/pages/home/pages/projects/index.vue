@@ -17,6 +17,7 @@
 <script setup lang="ts">
 import { translate } from "@toonflow/i18n/vue";
 import axios from "axios";
+import brand from "@toonflow/assets/brand.ts";
 import { computed, onUnmounted, ref } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { IconEdit, IconFileZip, IconTrash } from "@tabler/icons-vue";
@@ -41,7 +42,7 @@ async function exportProject(project: Project) {
   exportingDirectory.value = directory;
   try {
     let name = project.name.replace(/[<>:"/\\|?*\x00-\x1f\x7f-\x9f]/g, "_").slice(0, 120).replace(/[. ]+$/, "");
-    if (!name || /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(name)) name = "Toonflow";
+    if (!name || /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(name)) name = brand.name;
     const files = useWorkspaceFiles(directory);
     await saveFile(() => files.exportZip(pageLifetime.signal), `${name}.zip`);
   } catch (error) {

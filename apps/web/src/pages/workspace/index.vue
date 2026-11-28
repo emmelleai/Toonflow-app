@@ -80,6 +80,7 @@
                       使用教程
                     </el-button>
                     <el-button
+                      v-if="channelCapabilities.community"
                       class="helpAction"
                       tag="a"
                       text
@@ -91,20 +92,20 @@
                       @click="helpVisible = false">
                       汇报 BUG
                     </el-button>
-                    <el-button class="helpAction" text :icon="IconBrandWechat" @click="showContact('community')">加入交流群</el-button>
-                    <el-button class="helpAction" text :icon="IconBriefcase" @click="showContact('business')">商务合作</el-button>
+                    <el-button v-if="channelCapabilities.community" class="helpAction" text :icon="IconBrandWechat" @click="showContact('community')">加入交流群</el-button>
+                    <el-button v-if="channelCapabilities.community" class="helpAction" text :icon="IconBriefcase" @click="showContact('business')">商务合作</el-button>
                   </div>
                 </el-popover>
               </span>
             </el-tooltip>
           </div>
         </el-card>
-        <el-tooltip v-if="!agentVisible" content="Toonflow Agent" placement="top" :showArrow="false" :hideAfter="0">
+        <el-tooltip v-if="!agentVisible" :content="`${brand.name} Agent`" placement="top" :showArrow="false" :hideAfter="0">
           <el-button
             class="agentButton"
             :class="{ standalone: activePanel !== 'canvas' }"
             :aria-expanded="agentVisible"
-            aria-label="Toonflow Agent"
+            :aria-label="`${brand.name} Agent`"
             aria-controls="agentPanel"
             @click="agentVisible = !agentVisible"></el-button>
         </el-tooltip>
@@ -134,6 +135,7 @@ import { translate } from "@toonflow/i18n/vue";
 import { computed, defineAsyncComponent, nextTick, onMounted, onScopeDispose, provide, ref, shallowRef, watch, type ComponentPublicInstance } from "vue";
 import { onBeforeRouteLeave } from "vue-router";
 import axios from "axios";
+import brand from "@toonflow/assets/brand.ts";
 import { IconVector, IconFileText, IconPointer, IconHandStop, IconPlus, IconSearch, IconHelp, IconBook, IconBug, IconBrandWechat, IconBriefcase } from "@tabler/icons-vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { QRCode } from "tdesign-vue-next";

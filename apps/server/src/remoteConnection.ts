@@ -141,10 +141,10 @@ export async function createRemoteConnection(directory: string, options: {
     try {
       if (request.body?.qrCode !== undefined) {
         const text = request.body.qrCode;
-        if (typeof text !== "string" || text.length > 4096) throw new Error("请扫描 Toonflow 的互联二维码");
+        if (typeof text !== "string" || text.length > 4096) throw new Error("请扫描 gmcut 的互联二维码");
         const value = JSON.parse(text);
         if (value.type !== "toonflowMobile" || value.version !== 1 || typeof value.code !== "string" || !/^[\w-]{32,256}$/.test(value.code)) {
-          throw new Error("请扫描 Toonflow 的互联二维码");
+          throw new Error("请扫描 gmcut 的互联二维码");
         }
         pair = { url: serverUrl(value.url), code: value.code };
       } else {

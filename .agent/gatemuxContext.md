@@ -199,7 +199,8 @@
   - 只发布桌面版：调试工作流新增 `desktop` 目标（六个桌面平台，不含 Android），发布工作流使用它；Android 代码保留但不改名、不发布（`toonflow://restart`、`toonflow://save` 仅 Android 使用）。
   - 发布工作流只发布到 gmcut 仓库的 GitHub Releases，已移除上游的 `TFROUTER_UPLOAD_*` 上传；发布说明改为 gmcut 并注明未签名。
   - macOS：配置了 `MACOS_CERTIFICATE_BASE64` 等签名 Secret 才签名与公证，未配置时构建未签名包。
-  - 尚未处理：原生启动画面 `packages/startup/assets/startup.json` 是绘制 Toonflow 字样的 Lottie 动画，需要重新制作 gmcut 版本；上游的 `signPath.yml` 仍指向上游的 SignPath 配置，申请到 gmcut 自己的 SignPath 后再替换；Windows 代码签名。
+  - 品牌补充（5b 之后）：原生启动画面 `packages/startup/assets/startup.json` 保留上游 Lottie 的分段与动效，仅替换为 gmcut 图形与 Liberation Sans Bold（OFL）转出的 gmcut 字形轮廓；首次弹窗标题用 `brand.name`，正文改读 `apps/web/src/components/releaseNotes.md`（上游 `updateBox.md` 不改，便于同步）；界面与 MCP 中可见的 Toonflow 文案改为 gmcut，并同步重命名 `packages/i18n` 字典键及 22 种语言译文中的品牌名；工作区帮助中的上游反馈表、交流群、商务合作与设置中的多租户页随 `community` 能力隐藏。保留不改：仅 Toonflow 渠道或多租户可见的文案、插件格式名（如“Toonflow 节点”）、`packages/mcp` 文案（该文件本地有权限位变更）。同步上游后若出现新的 Toonflow 可见文案，按同样方式处理。
+  - 尚未处理：上游的 `signPath.yml` 仍指向上游的 SignPath 配置，申请到 gmcut 自己的 SignPath 后再替换；Windows 代码签名。
 - **5b 原计划范围（供核对）**：应用名与 identifier（建议 `cn.gatemux.gmcut`）、安装协议名（建议 `gmcut://`，含 Windows 注册表、Linux `.desktop`、macOS URL Scheme）、安装包与安装路径（`/opt/toonflow`、NSIS、PKG、`.deb` 文件名）、原生辅助程序中的名称、数据目录名、Windows 通知注册名、启动画面；发布流水线改为发布到 gmcut 仓库的 GitHub Releases，移除上游的 `TFROUTER_UPLOAD_*` 上传；代码签名（SignPath 申请通过后接入，macOS 需 Apple 开发者账号）。
 
 ## 许可与品牌合规

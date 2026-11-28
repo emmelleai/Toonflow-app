@@ -64,6 +64,7 @@
 import { locale, translate } from "@toonflow/i18n/vue";
 import { computed, inject, onBeforeUnmount, reactive, ref, watch } from "vue";
 import axios from "axios";
+import brand from "@toonflow/assets/brand.ts";
 import { IconCornerDownRight, IconListDetails, IconLoader2, IconPencil, IconTrash } from "@tabler/icons-vue";
 import { ElMessage } from "element-plus";
 import { getReadableFileExtension, getReadableFileMimeType } from "@toonflow/server/documentFormats";
@@ -567,7 +568,7 @@ async function sendMessage(source?: AgentMessage) {
         if (!notifiedQuestions.has(toolEvent.callId) && !stopping.value && !projectStops.value
           && !requestController.signal.aborted && !canvasRunIds.some(id => stoppedRunIds.has(id))) {
           notifiedQuestions.add(toolEvent.callId);
-          void showNotification({ title: "Toonflow", body: translate("工具正在等待你的确认") })
+          void showNotification({ title: brand.name, body: translate("工具正在等待你的确认") })
             .catch(error => console.warn("系统通知发送失败", error));
         }
       }
@@ -655,7 +656,7 @@ async function sendMessage(source?: AgentMessage) {
     emit("sent", mentionPlainText(prompt, mentions) || attachments[0]?.name || "新对话");
     if (accepted && ownsStream && !forwarded && !isSuperseded() && !props.initialSession?.parentFile && !stopping.value && !projectStops.value
       && !requestController.signal.aborted && !stoppedRunIds.has(requestRunId)) {
-      void showNotification({ title: "Toonflow", body: translate("Agent 已完成回复") })
+      void showNotification({ title: brand.name, body: translate("Agent 已完成回复") })
         .catch(error => console.warn("系统通知发送失败", error));
     }
   } catch (error) {

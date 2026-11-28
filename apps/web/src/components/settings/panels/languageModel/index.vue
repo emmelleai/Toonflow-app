@@ -1,7 +1,7 @@
 <template>
   <div class="providerList">
     <div class="itemList">
-      <toonflowProviderCard scope="text" :provider="customProviders.find(item => item.id.toLowerCase() === 'toonflow')" />
+      <toonflowProviderCard v-if="channelCapabilities.account" scope="text" :provider="customProviders.find(item => item.id.toLowerCase() === 'toonflow')" />
       <el-card v-for="item in visibleProviders" :key="item.id" class="providerItem" shadow="never">
         <div class="providerHeader">
           <div v-if="item.icon" class="providerMark" aria-hidden="true">
@@ -46,6 +46,7 @@ import { customProviders, saveSettings, type CustomProvider } from "@/stores/set
 import { IconPlus, IconEdit, IconTrash, IconArrowUp } from "@tabler/icons-vue";
 import { getBuiltinSource, useBuiltinUpgrades, type BuiltinLanguageProvider } from "@/lib/builtinProviders";
 import toonflowProviderCard from "../../toonflowProviderCard.vue";
+import { channelCapabilities } from "@/lib/channel";
 
 defineProps<{ visible?: boolean }>();
 const upgradeVersion = useBuiltinUpgrades("language");

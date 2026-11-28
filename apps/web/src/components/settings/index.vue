@@ -103,7 +103,9 @@ const developerStore = useDeveloperStore();
 const settingsPanels = computed(() => allSettingsPanels.filter(item => {
   if (publicWeb.value && currentUser.value?.role === "user") return ["account", "general", "about"].includes(item.id);
   if (publicWeb.value && ["multiTenant", "deviceLink", "network", "mcp", "developer", "pluginMarket"].includes(item.id)) return false;
-  const { account, customProviders, gatemuxAuth } = channelCapabilities.value;
+  const { account, community, customProviders, gatemuxAuth } = channelCapabilities.value;
+  // 多租户页只有上游“开发中”提示与商务联系方式，随社区能力隐藏。
+  if (!community && item.id === "multiTenant") return false;
   // 插件面板还管理已安装插件、MCP 与 FFmpeg，市场部分在面板内按渠道隐藏，这里不整页隐藏。
   if (!publicWeb.value && !account && item.id === "account") return false;
   if (item.id === "gatemuxAccount" && (publicWeb.value || !gatemuxAuth)) return false;
